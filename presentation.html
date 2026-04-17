@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bayesian Optimisation</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&family=Nunito:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- KaTeX for formulae -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+      onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+
+    <style>
+      /* ===========================================
+         CSS CUSTOM PROPERTIES — Swiss Modern
+         =========================================== */
+      :root {
+        --bg-primary: #ffffff;
+        --bg-secondary: #f5f5f5;
+        --text-primary: #1a1a1a;
+        --text-secondary: #444444;
+        --accent: #ff3300;
+        --accent-muted: rgba(255, 51, 0, 0.07);
+        --accent-blue: #1a5fb4;
+        --rule-color: #1a1a1a;
+
+        --font-display: "Archivo", sans-serif;
+        --font-body: "Nunito", sans-serif;
+        --title-size: clamp(2rem, 5.5vw, 4.5rem);
+        --h2-size: clamp(1.2rem, 3vw, 2.2rem);
+        --h3-size: clamp(0.95rem, 2vw, 1.35rem);
+        --subtitle-size: clamp(0.85rem, 1.8vw, 1.15rem);
+        --body-size: clamp(0.72rem, 1.3vw, 0.98rem);
+        --small-size: clamp(0.62rem, 0.95vw, 0.82rem);
+        --caption-size: clamp(0.58rem, 0.85vw, 0.76rem);
+
+        --slide-padding: clamp(1.5rem, 4vw, 4rem);
+        --content-gap: clamp(0.6rem, 1.5vw, 1.5rem);
+        --element-gap: clamp(0.2rem, 0.8vw, 0.7rem);
+
+        --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+        --duration-normal: 0.6s;
+      }
+
+      /* ===========================================
+         RESET & VIEWPORT BASE
+         =========================================== */
+      *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { height: 100%; overflow-x: hidden; }
+      html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+      body {
+        font-family: var(--font-body);
+        color: var(--text-primary);
+        background: var(--bg-primary);
+        font-size: var(--body-size);
+        line-height: 1.5;
+      }
+      .slide {
+        width: 100vw; height: 100vh; height: 100dvh;
+        overflow: hidden; scroll-snap-align: start;
+        display: flex; flex-direction: column; position: relative;
+      }
+      .slide-content {
+        flex: 1; display: flex; flex-direction: column;
+        justify-content: center; max-height: 100%; overflow: hidden;
+        padding: var(--slide-padding);
+      }
+
+      /* ===========================================
+         TYPOGRAPHY
+         =========================================== */
+      h1 { font-family: var(--font-display); font-size: var(--title-size); font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; }
+      h2 { font-family: var(--font-display); font-size: var(--h2-size); font-weight: 800; line-height: 1.15; letter-spacing: -0.01em; }
+      h3 { font-family: var(--font-display); font-size: var(--h3-size); font-weight: 700; line-height: 1.2; }
+      p, li { font-size: var(--body-size); color: var(--text-secondary); line-height: 1.55; }
+      strong { color: var(--text-primary); }
+
+      /* ===========================================
+         SLIDE LAYOUTS
+         =========================================== */
+      .title-slide .slide-content { justify-content: center; gap: clamp(0.6rem, 1.5vw, 1.4rem); }
+      .title-slide h1 { max-width: 16ch; }
+      .title-accent { color: var(--accent); }
+      .title-rule { width: clamp(40px, 8vw, 80px); height: 4px; background: var(--accent); }
+      .title-meta { font-size: var(--subtitle-size); color: var(--text-secondary); font-weight: 500; }
+
+      .section-slide .slide-content { justify-content: center; gap: clamp(0.4rem, 0.8vw, 0.8rem); }
+      .section-number { font-family: var(--font-display); font-size: clamp(2.5rem, 7vw, 6rem); font-weight: 800; color: var(--accent); line-height: 1; letter-spacing: -0.03em; }
+      .section-rule { width: clamp(30px, 6vw, 60px); height: 3px; background: var(--rule-color); }
+      .section-slide h2 { font-size: clamp(1.3rem, 3.2vw, 2.5rem); }
+
+      .content-slide .slide-content { gap: var(--content-gap); }
+      .content-slide h2 { padding-bottom: clamp(0.2rem, 0.4vw, 0.4rem); border-bottom: 2px solid var(--rule-color); display: inline-block; }
+
+      .bullet-list { list-style: none; display: flex; flex-direction: column; gap: clamp(0.25rem, 0.6vh, 0.6rem); padding-left: 0; }
+      .bullet-list li { padding-left: clamp(0.9rem, 1.8vw, 1.6rem); position: relative; }
+      .bullet-list li::before { content: ""; position: absolute; left: 0; top: 0.5em; width: clamp(5px, 0.5vw, 8px); height: clamp(5px, 0.5vw, 8px); background: var(--accent); }
+
+      .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1rem, 2.5vw, 2.5rem); align-items: start; }
+      .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: clamp(0.8rem, 2vw, 2rem); align-items: start; }
+
+      /* Tables */
+      .slide-table { width: 100%; border-collapse: collapse; font-size: var(--body-size); }
+      .slide-table th, .slide-table td { text-align: left; padding: clamp(0.2rem, 0.5vw, 0.5rem) clamp(0.4rem, 0.8vw, 0.8rem); border-bottom: 1px solid #e0e0e0; }
+      .slide-table th { font-family: var(--font-display); font-weight: 700; font-size: var(--small-size); text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-primary); border-bottom: 2px solid var(--rule-color); }
+      .slide-table td { color: var(--text-secondary); }
+
+      /* Images */
+      .img-slide .slide-content { gap: clamp(0.4rem, 0.8vh, 0.8rem); }
+      .slide-image { max-width: 100%; max-height: min(52vh, 460px); object-fit: contain; border: 1px solid #e0e0e0; border-radius: 3px; }
+      .slide-image.wide { max-height: min(48vh, 420px); }
+      .slide-image.tall { max-height: min(58vh, 500px); }
+      .slide-image.compact { max-height: min(42vh, 360px); }
+      .img-caption { font-size: var(--caption-size); color: var(--text-secondary); font-style: italic; }
+
+      /* Formula blocks */
+      .formula-block {
+        background: var(--bg-secondary); border-left: 3px solid var(--accent);
+        padding: clamp(0.5rem, 1vw, 1rem) clamp(0.7rem, 1.2vw, 1.2rem);
+        border-radius: 2px; overflow-x: auto;
+      }
+      .formula-block .katex { font-size: clamp(0.85rem, 1.4vw, 1.15rem); }
+      .formula-block p { color: var(--text-primary); }
+
+      /* Definition block */
+      .definition {
+        background: var(--bg-secondary);
+        border-left: 3px solid var(--accent-blue);
+        padding: clamp(0.5rem, 1vw, 1rem) clamp(0.7rem, 1.2vw, 1.2rem);
+        border-radius: 2px;
+      }
+      .definition .def-label {
+        font-family: var(--font-display); font-weight: 700;
+        font-size: var(--small-size); text-transform: uppercase;
+        letter-spacing: 0.06em; color: var(--accent-blue);
+        margin-bottom: clamp(0.15rem, 0.3vw, 0.3rem);
+      }
+      .definition p { color: var(--text-primary); }
+
+      /* Callout */
+      .callout { background: var(--accent-muted); border-left: 3px solid var(--accent); padding: clamp(0.4rem, 0.8vw, 0.8rem) clamp(0.6rem, 1.2vw, 1.2rem); border-radius: 2px; }
+      .callout p { color: var(--text-primary); font-weight: 600; }
+
+      /* Note (lighter callout) */
+      .note { background: #f0f4ff; border-left: 3px solid var(--accent-blue); padding: clamp(0.4rem, 0.8vw, 0.8rem) clamp(0.6rem, 1.2vw, 1.2rem); border-radius: 2px; }
+      .note p { color: var(--text-secondary); }
+
+      /* Slide number */
+      .slide-num { position: absolute; bottom: clamp(0.4rem, 1.2vh, 1rem); right: var(--slide-padding); font-family: var(--font-display); font-size: var(--small-size); color: #bbb; font-weight: 700; }
+
+      /* Code block */
+      .code-block {
+        background: #1a1a1a; color: #e0e0e0;
+        padding: clamp(0.4rem, 0.8vw, 0.8rem) clamp(0.6rem, 1.2vw, 1.2rem);
+        border-radius: 3px; font-family: "Courier New", monospace;
+        font-size: var(--small-size); line-height: 1.5; overflow: hidden;
+      }
+      .code-block .kw { color: #ff7b72; }
+      .code-block .fn { color: #d2a8ff; }
+      .code-block .str { color: #a5d6ff; }
+      .code-block .cm { color: #8b949e; }
+      .code-block .num { color: #79c0ff; }
+
+      /* Recap tag */
+      .recap-tag {
+        display: inline-block; font-family: var(--font-display); font-size: var(--caption-size);
+        font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+        color: var(--accent-blue); background: #e8f0fe;
+        padding: 0.15em 0.6em; border-radius: 2px; margin-bottom: clamp(0.2rem, 0.4vw, 0.4rem);
+      }
+
+      /* Term highlight */
+      .term { color: var(--accent); font-weight: 700; }
+
+      /* ===========================================
+         ANIMATIONS
+         =========================================== */
+      .reveal { opacity: 0; transform: translateY(20px); transition: opacity var(--duration-normal) var(--ease-out-expo), transform var(--duration-normal) var(--ease-out-expo); }
+      .slide.visible .reveal { opacity: 1; transform: translateY(0); }
+      .reveal:nth-child(1) { transition-delay: 0.04s; }
+      .reveal:nth-child(2) { transition-delay: 0.10s; }
+      .reveal:nth-child(3) { transition-delay: 0.16s; }
+      .reveal:nth-child(4) { transition-delay: 0.22s; }
+      .reveal:nth-child(5) { transition-delay: 0.28s; }
+      .reveal:nth-child(6) { transition-delay: 0.34s; }
+      .reveal:nth-child(7) { transition-delay: 0.40s; }
+
+      /* ===========================================
+         PROGRESS BAR & NAV
+         =========================================== */
+      .progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--accent); z-index: 1000; transition: width 0.3s ease; }
+      .nav-dots { position: fixed; right: clamp(6px, 1vw, 14px); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: clamp(4px, 0.6vh, 8px); z-index: 1000; }
+      .nav-dot { width: clamp(5px, 0.45vw, 7px); height: clamp(5px, 0.45vw, 7px); border-radius: 50%; background: #ccc; border: none; cursor: pointer; transition: background 0.3s, transform 0.3s; padding: 0; }
+      .nav-dot.active { background: var(--accent); transform: scale(1.5); }
+
+      /* ===========================================
+         RESPONSIVE BREAKPOINTS
+         =========================================== */
+      @media (max-height: 700px) {
+        :root { --slide-padding: clamp(0.75rem, 3vw, 2rem); --content-gap: clamp(0.35rem, 1.2vw, 0.9rem); --title-size: clamp(1.5rem, 5vw, 3rem); --h2-size: clamp(1rem, 2.6vw, 1.7rem); }
+      }
+      @media (max-height: 600px) {
+        :root { --slide-padding: clamp(0.5rem, 2.5vw, 1.5rem); --content-gap: clamp(0.25rem, 0.8vw, 0.6rem); --body-size: clamp(0.68rem, 1.1vw, 0.9rem); }
+        .nav-dots { display: none; }
+      }
+      @media (max-height: 500px) {
+        :root { --slide-padding: clamp(0.4rem, 2vw, 1rem); --title-size: clamp(1rem, 3.5vw, 1.5rem); --h2-size: clamp(0.85rem, 2.3vw, 1.2rem); --body-size: clamp(0.62rem, 1vw, 0.82rem); }
+      }
+      @media (max-width: 600px) { .two-col, .three-col { grid-template-columns: 1fr; } }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+        html { scroll-behavior: auto; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="progress-bar" id="progressBar"></div>
+    <nav class="nav-dots" id="navDots"></nav>
+
+    <!-- =============================================
+         SLIDE 1 — Title
+         ============================================= -->
+    <section class="slide title-slide">
+      <div class="slide-content">
+        <h1 class="reveal">Bayesian<br /><span class="title-accent">Optimisation</span></h1>
+        <div class="title-rule reveal"></div>
+        <p class="title-meta reveal">
+          Surrogate Models, Acquisition Functions &amp; Sample-Efficient Search
+        </p>
+        <p class="title-meta reveal" style="font-size: var(--small-size); margin-top: clamp(0.5rem,1vw,1rem);">
+          Bayesian Optimization II &mdash; Building on the GP foundations from Lecture I
+        </p>
+      </div>
+      <span class="slide-num">1</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 2 — Recap from Lecture I
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <span class="recap-tag reveal">Recap from Lecture I</span>
+        <h2 class="reveal">What We Know So Far</h2>
+        <p class="reveal">In the previous lecture we established that a <strong>Gaussian Process (GP)</strong> is a distribution over functions, fully specified by a mean function $\mu(x)$ and a kernel (covariance) function $k(x, x')$:</p>
+        <div class="formula-block reveal">
+          <p>$$f(x) \sim \mathcal{GP}\!\bigl(\mu(x),\; k(x, x')\bigr)$$</p>
+        </div>
+        <p class="reveal">Given observed data, the GP posterior gives us at every point:</p>
+        <ul class="bullet-list">
+          <li class="reveal">A <strong>mean prediction</strong> $\mu(x)$ &mdash; our best estimate of $f(x)$</li>
+          <li class="reveal">A <strong>predictive variance</strong> $\sigma^2(x)$ &mdash; our calibrated uncertainty</li>
+        </ul>
+        <div class="note reveal">
+          <p>Today's lecture takes these GP capabilities as given and asks: <strong>how do we use them to optimise an expensive function?</strong></p>
+        </div>
+      </div>
+      <span class="slide-num">2</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 3 — Section: What & Why
+         ============================================= -->
+    <section class="slide section-slide">
+      <div class="slide-content">
+        <span class="section-number reveal">01</span>
+        <div class="section-rule reveal"></div>
+        <h2 class="reveal">What is Bayesian Optimisation<br />and why do we need it?</h2>
+      </div>
+      <span class="slide-num">3</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 4 — The Problem (formal)
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <h2 class="reveal">The Optimisation Problem</h2>
+        <p class="reveal">We seek the global optimum of an objective function:</p>
+        <div class="formula-block reveal">
+          <p>$$x^{*} = \arg\max_{x \in \mathcal{X}} f(x)$$</p>
+        </div>
+        <p class="reveal">where $f$ has properties that make classical methods impractical:</p>
+        <ul class="bullet-list">
+          <li class="reveal"><strong>Expensive to evaluate</strong> &mdash; each call may be a CFD simulation (hours), a physical experiment (days), or a neural-network training run (GPU-hours)</li>
+          <li class="reveal"><strong>Black-box</strong> &mdash; no closed-form expression is available; we only observe input-output pairs $(x_i, y_i)$</li>
+          <li class="reveal"><strong>No gradient information</strong> &mdash; derivatives of $f$ are unavailable, so gradient-based optimisers cannot be used</li>
+          <li class="reveal"><strong>Possibly noisy</strong> &mdash; observations may be corrupted: $y = f(x) + \varepsilon$, where $\varepsilon \sim \mathcal{N}(0, \sigma_n^2)$</li>
+        </ul>
+      </div>
+      <span class="slide-num">4</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 5 — Why not brute force?
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <h2 class="reveal">Why Not Brute Force?</h2>
+        <p class="reveal">When evaluations are cheap, we can afford exhaustive strategies. When they are expensive, we cannot:</p>
+        <table class="slide-table reveal">
+          <thead>
+            <tr><th>Method</th><th>Strategy</th><th>Evaluations needed</th><th>Uses past data?</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Grid search</strong></td><td>Evaluate on a fixed grid</td><td>$O(k^d)$ &mdash; exponential in dimension $d$</td><td>No</td></tr>
+            <tr><td><strong>Random search</strong></td><td>Sample uniformly at random</td><td>Many, high variance</td><td>No</td></tr>
+            <tr><td><strong>Gradient descent</strong></td><td>Follow $\nabla f$</td><td>Moderate</td><td>Requires gradients</td></tr>
+            <tr><td><strong>Bayesian Optimisation</strong></td><td>Model $f$, then decide</td><td>Very few (typically 10&ndash;100)</td><td><strong>Yes</strong></td></tr>
+          </tbody>
+        </table>
+        <div class="callout reveal">
+          <p>BO's advantage: it builds a statistical model of $f$ and uses <strong>all previous evaluations</strong> to decide where to sample next.</p>
+        </div>
+      </div>
+      <span class="slide-num">5</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 6 — Two ingredients
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <h2 class="reveal">The Two Ingredients of BO</h2>
+        <p class="reveal">Bayesian Optimisation combines two components in a sequential loop:</p>
+        <div class="two-col reveal">
+          <div>
+            <h3>1. Surrogate Model</h3>
+            <p>A cheap probabilistic approximation of $f(x)$ that provides predictions <strong>with uncertainty</strong>.</p>
+            <p style="margin-top: var(--element-gap);"><em>Answers: "What do we think $f$ looks like?"</em></p>
+          </div>
+          <div>
+            <h3>2. Acquisition Function</h3>
+            <p>A utility function $\alpha(x)$ that quantifies the <strong>value of evaluating</strong> $f$ at a candidate point $x$.</p>
+            <p style="margin-top: var(--element-gap);"><em>Answers: "Where should we sample next?"</em></p>
+          </div>
+        </div>
+        <p class="reveal" style="margin-top: var(--element-gap);">Together they form a <strong>sequential decision process</strong>: model &rarr; decide &rarr; evaluate &rarr; update &rarr; repeat.</p>
+      </div>
+      <span class="slide-num">6</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 7 — Section: Surrogate Model
+         ============================================= -->
+    <section class="slide section-slide">
+      <div class="slide-content">
+        <span class="section-number reveal">02</span>
+        <div class="section-rule reveal"></div>
+        <h2 class="reveal">The Surrogate Model</h2>
+      </div>
+      <span class="slide-num">7</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 8 — Surrogate definition
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <h2 class="reveal">What is a Surrogate Model?</h2>
+        <div class="definition reveal">
+          <div class="def-label">Definition</div>
+          <p>A <strong>surrogate model</strong> (also: metamodel, emulator, response surface) is a statistical model that approximates an expensive function $f(x)$ from a small set of observations $\mathcal{D}_n = \{(x_i, y_i)\}_{i=1}^{n}$.</p>
+        </div>
+        <p class="reveal">For BO, the surrogate must provide <strong>two outputs</strong> at every query point $x$:</p>
+        <ul class="bullet-list">
+          <li class="reveal"><strong>Predictive mean</strong> $\mu(x) = \mathbb{E}[f(x) \mid \mathcal{D}_n]$ &mdash; the best estimate</li>
+          <li class="reveal"><strong>Predictive uncertainty</strong> $\sigma(x) = \sqrt{\text{Var}[f(x) \mid \mathcal{D}_n]}$ &mdash; how confident the estimate is</li>
+        </ul>
+        <p class="reveal">The uncertainty is <strong>critical</strong>: it is what allows BO to distinguish "explored" regions from "unexplored" ones and to make principled decisions about where to sample next.</p>
+      </div>
+      <span class="slide-num">8</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 9 — Why GPs as surrogates
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <h2 class="reveal">Why GPs Are the Default Surrogate</h2>
+        <p class="reveal">Many models can predict $\mu(x)$, but few give well-calibrated $\sigma(x)$. GPs are the standard choice because:</p>
+        <ul class="bullet-list">
+          <li class="reveal"><strong>Closed-form posterior</strong> &mdash; predictions are exact (no sampling needed), computed via the conditioning formulae from Lecture I</li>
+          <li class="reveal"><strong>Calibrated uncertainty</strong> &mdash; $\sigma(x)$ is analytically derived, not heuristic; it shrinks exactly at observed points and grows in unobserved regions</li>
+          <li class="reveal"><strong>Non-parametric</strong> &mdash; the model complexity grows with the data, not fixed in advance</li>
+          <li class="reveal"><strong>Data-efficient</strong> &mdash; perform well with very few observations ($n &lt; 50$), which is exactly the regime where BO operates</li>
+        </ul>
+        <div class="note reveal">
+          <p>Other surrogates (Random Forests, Bayesian Neural Networks, etc.) can be used, but GPs remain the most common choice for low-dimensional BO.</p>
+        </div>
+      </div>
+      <span class="slide-num">9</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 10 — Surrogate visualised
+         ============================================= -->
+    <section class="slide img-slide">
+      <div class="slide-content">
+        <h2 class="reveal">Surrogate Fitted to 3 Initial Samples</h2>
+        <p class="reveal">Below is a GP surrogate trained on just 3 observations. The <strong>blue line</strong> is the posterior mean $\mu(x)$ and the <strong>shaded band</strong> shows $\mu \pm 2\sigma$ (a 95% confidence interval). The dashed black line is the true function, which the surrogate does not have access to.</p>
+        <img src="assets/gp_surrogate.png" alt="GP surrogate with mean and confidence interval" class="slide-image reveal" />
+        <ul class="bullet-list reveal" style="margin-top: var(--element-gap);">
+          <li><strong>Near observations</strong> (red dots): the band collapses &mdash; the model is certain</li>
+          <li><strong>Far from observations</strong>: the band widens &mdash; the model honestly reports its ignorance</li>
+        </ul>
+      </div>
+      <span class="slide-num">10</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 11 — Section: Acquisition Functions
+         ============================================= -->
+    <section class="slide section-slide">
+      <div class="slide-content">
+        <span class="section-number reveal">03</span>
+        <div class="section-rule reveal"></div>
+        <h2 class="reveal">Acquisition Functions</h2>
+      </div>
+      <span class="slide-num">11</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 12 — What is an acquisition function?
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <h2 class="reveal">What is an Acquisition Function?</h2>
+        <div class="definition reveal">
+          <div class="def-label">Definition</div>
+          <p>An <strong>acquisition function</strong> $\alpha(x)$ is a cheap-to-evaluate utility that scores every candidate point $x$ based on how valuable it would be to evaluate $f(x)$ there. The next sample is chosen as $x_{n+1} = \arg\max_{x \in \mathcal{X}} \alpha(x)$.</p>
+        </div>
+        <p class="reveal">The acquisition function uses the GP posterior ($\mu$ and $\sigma$) as its input &mdash; it never calls the expensive $f$ itself. Different acquisition functions encode different strategies for balancing two competing goals:</p>
+        <ul class="bullet-list">
+          <li class="reveal"><strong>Exploitation</strong> &mdash; sample where $\mu(x)$ is already high (refine what we know)</li>
+          <li class="reveal"><strong>Exploration</strong> &mdash; sample where $\sigma(x)$ is large (learn where we are ignorant)</li>
+        </ul>
+        <p class="reveal">In this lecture we will cover the three most widely used acquisition functions:</p>
+        <table class="slide-table reveal">
+          <thead><tr><th>Function</th><th>Abbreviation</th><th>Core idea</th></tr></thead>
+          <tbody>
+            <tr><td>Expected Improvement</td><td><strong>EI</strong></td><td>How <em>much</em> improvement can we expect?</td></tr>
+            <tr><td>Probability of Improvement</td><td><strong>PI</strong></td><td>How <em>likely</em> is any improvement?</td></tr>
+            <tr><td>Upper Confidence Bound</td><td><strong>UCB</strong></td><td>What is the <em>optimistic upper bound</em> on $f$?</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <span class="slide-num">12</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 13 — Explore vs Exploit (detailed)
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <h2 class="reveal">The Exploration&ndash;Exploitation Trade-off</h2>
+        <p class="reveal">Before diving into the formulae, let us build intuition for the central tension that every acquisition function must resolve:</p>
+        <div class="two-col reveal">
+          <div>
+            <h3 style="color: #c0392b;">Exploitation</h3>
+            <p>Sample where the <strong>predicted mean $\mu(x)$ is high</strong> &mdash; regions we already believe are good.</p>
+            <p style="margin-top: var(--element-gap);"><strong>Risk:</strong> converging to a <strong>local optimum</strong> and missing the global one, because we never looked elsewhere.</p>
+          </div>
+          <div>
+            <h3 style="color: #2980b9;">Exploration</h3>
+            <p>Sample where the <strong>uncertainty $\sigma(x)$ is large</strong> &mdash; regions we haven't explored.</p>
+            <p style="margin-top: var(--element-gap);"><strong>Risk:</strong> wasting expensive evaluations in regions that turn out to be <strong>uninteresting</strong>.</p>
+          </div>
+        </div>
+        <div class="callout reveal">
+          <p>A good acquisition function balances both signals. Too much exploitation = stuck in a local basin. Too much exploration = slow convergence. The three functions we cover next differ mainly in <strong>how</strong> they strike this balance.</p>
+        </div>
+      </div>
+      <span class="slide-num">13</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 14 — Common notation
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <h2 class="reveal">Shared Notation</h2>
+        <p class="reveal">Before we define each acquisition function, let us establish the shared notation. All three build on the same GP posterior quantities:</p>
+        <table class="slide-table reveal">
+          <thead>
+            <tr><th>Symbol</th><th>Meaning</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>$\mu(x)$</td><td>GP posterior mean at $x$</td></tr>
+            <tr><td>$\sigma(x)$</td><td>GP posterior standard deviation at $x$</td></tr>
+            <tr><td>$f^* = \max_{i=1,\ldots,n} y_i$</td><td>Best observed value so far (the "incumbent")</td></tr>
+            <tr><td>$\Phi(\cdot)$</td><td>Standard normal CDF &mdash; $\Phi(z) = P(Z \leq z)$</td></tr>
+            <tr><td>$\phi(\cdot)$</td><td>Standard normal PDF &mdash; $\phi(z) = \frac{1}{\sqrt{2\pi}}e^{-z^2/2}$</td></tr>
+            <tr><td>$Z$</td><td>Standardised improvement: $Z = \dfrac{\mu(x) - f^*}{\sigma(x)}$</td></tr>
+          </tbody>
+        </table>
+        <p class="reveal">With these in hand, each acquisition function is just a different way of combining $\mu$, $\sigma$, and $f^*$.</p>
+      </div>
+      <span class="slide-num">14</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 15 — Expected Improvement
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <h2 class="reveal">Expected Improvement (EI)</h2>
+        <div class="definition reveal">
+          <div class="def-label">Definition</div>
+          <p>EI measures the <strong>expected amount</strong> by which a new evaluation will improve over the current best $f^*$.</p>
+        </div>
+        <div class="formula-block reveal">
+          <p>$$\text{EI}(x) = \begin{cases} (\mu(x) - f^*)\,\Phi(Z) + \sigma(x)\,\phi(Z) & \text{if } \sigma(x) > 0 \\ 0 & \text{if } \sigma(x) = 0 \end{cases}$$</p>
+          <p style="margin-top: 0.3em;">$$\text{where}\quad Z = \frac{\mu(x) - f^*}{\sigma(x)}$$</p>
+        </div>
+        <p class="reveal"><strong>Interpreting the two terms:</strong></p>
+        <ul class="bullet-list">
+          <li class="reveal"><span class="term">$(\mu(x) - f^*)\,\Phi(Z)$</span> &mdash; <strong>exploitation</strong>: large when the mean is well above $f^*$ and improvement is likely</li>
+          <li class="reveal"><span class="term">$\sigma(x)\,\phi(Z)$</span> &mdash; <strong>exploration</strong>: large when uncertainty is high, even if the mean is not promising</li>
+        </ul>
+      </div>
+      <span class="slide-num">15</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 16 — EI derivation sketch
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <h2 class="reveal">Where Does the EI Formula Come From?</h2>
+        <p class="reveal">Define the <strong>improvement</strong> random variable at point $x$ as:</p>
+        <div class="formula-block reveal">
+          <p>$$I(x) = \max\bigl(f(x) - f^*,\; 0\bigr)$$</p>
+        </div>
+        <p class="reveal">EI is the expectation of $I(x)$ under the GP posterior, where $f(x) \sim \mathcal{N}\!\bigl(\mu(x), \sigma^2(x)\bigr)$:</p>
+        <div class="formula-block reveal">
+          <p>$$\text{EI}(x) = \mathbb{E}\bigl[I(x)\bigr] = \int_{f^*}^{\infty} (f - f^*)\;\mathcal{N}\!\bigl(f \mid \mu(x), \sigma^2(x)\bigr)\;df$$</p>
+        </div>
+        <p class="reveal">Evaluating this integral analytically (by substituting $z = \frac{f - \mu}{\sigma}$ and integrating by parts) yields the closed-form expression on the previous slide.</p>
+        <div class="note reveal">
+          <p>This closed form is one reason EI is so popular: it is cheap to compute and differentiable with respect to $x$, making it easy to optimise.</p>
+        </div>
+      </div>
+      <span class="slide-num">16</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 17 — EI decomposition visual
+         ============================================= -->
+    <section class="slide img-slide">
+      <div class="slide-content">
+        <h2 class="reveal">Visualising the Two Terms of EI</h2>
+        <p class="reveal">The figure below decomposes EI into its constituent parts on a GP fitted to the initial 3 observations, making it possible to see how the exploitation and exploration terms contribute at each point $x$:</p>
+        <img src="assets/explore_exploit.png" alt="Decomposition of EI into exploitation and exploration" class="slide-image wide reveal" />
+        <ul class="bullet-list reveal" style="margin-top: var(--element-gap);">
+          <li><strong>Left (red)</strong>: the exploitation term $(\mu - f^*)\Phi(Z)$ &mdash; peaks where the mean already exceeds $f^*$</li>
+          <li><strong>Middle (blue)</strong>: the exploration term $\sigma\,\phi(Z)$ &mdash; peaks in high-uncertainty regions</li>
+          <li><strong>Right (green)</strong>: the full EI &mdash; the sum of both, selecting a point that balances the two signals</li>
+        </ul>
+      </div>
+      <span class="slide-num">17</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 18 — Probability of Improvement
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <h2 class="reveal">Probability of Improvement (PI)</h2>
+        <p class="reveal">Having seen how EI balances explore and exploit, let us now look at a simpler alternative:</p>
+        <div class="definition reveal">
+          <div class="def-label">Definition</div>
+          <p>PI measures the <strong>probability</strong> that a new evaluation will exceed the current best by at least a margin $\xi \geq 0$.</p>
+        </div>
+        <div class="formula-block reveal">
+          <p>$$\text{PI}(x) = P\bigl(f(x) > f^* + \xi\bigr) = \Phi\!\left(\frac{\mu(x) - f^* - \xi}{\sigma(x)}\right)$$</p>
+        </div>
+        <p class="reveal"><strong>Key properties:</strong></p>
+        <ul class="bullet-list">
+          <li class="reveal">PI asks <em>only</em> whether improvement occurs, <strong>not how much</strong> &mdash; a tiny improvement and a huge one are treated identically</li>
+          <li class="reveal">With $\xi = 0$: very <strong>greedy</strong> &mdash; samples cluster near the current best, risking premature convergence</li>
+          <li class="reveal">Increasing $\xi$ adds a margin that encourages more exploration, but the right value is problem-dependent</li>
+          <li class="reveal">PI was one of the <strong>earliest</strong> acquisition functions proposed (Kushner, 1964)</li>
+        </ul>
+      </div>
+      <span class="slide-num">18</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 19 — Upper Confidence Bound
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <h2 class="reveal">Upper Confidence Bound (UCB)</h2>
+        <p class="reveal">UCB takes an entirely different approach from EI and PI. Rather than reasoning about improvement over $f^*$, it constructs an <strong>optimistic estimate</strong> of the function itself:</p>
+        <div class="definition reveal">
+          <div class="def-label">Definition</div>
+          <p>UCB scores each point by its mean <strong>plus</strong> an exploration bonus proportional to the uncertainty.</p>
+        </div>
+        <div class="formula-block reveal">
+          <p>$$\text{UCB}(x) = \mu(x) + \kappa\,\sigma(x)$$</p>
+        </div>
+        <p class="reveal"><strong>Key properties:</strong></p>
+        <ul class="bullet-list">
+          <li class="reveal">$\kappa > 0$ <strong>directly controls</strong> the balance: $\kappa = 0$ is pure exploitation; $\kappa \to \infty$ is pure exploration</li>
+          <li class="reveal">Also called <strong>GP-UCB</strong>; has theoretical regret bounds: $O(\sqrt{T\,\gamma_T})$ where $\gamma_T$ is the information gain (Srinivas et al., 2010)</li>
+          <li class="reveal">Common practical choice: $\kappa = 2$ (roughly a 95% upper confidence bound)</li>
+        </ul>
+      </div>
+      <span class="slide-num">19</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 20 — Side-by-side summary table
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <h2 class="reveal">Summary: Three Acquisition Functions at a Glance</h2>
+        <p class="reveal">Now that we have seen each function individually, the table below collects the key differences for easy comparison:</p>
+        <table class="slide-table reveal">
+          <thead>
+            <tr><th>Property</th><th>EI</th><th>PI</th><th>UCB</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Formula</strong></td><td>$(\mu - f^*)\Phi(Z) + \sigma\phi(Z)$</td><td>$\Phi\!\left(\frac{\mu - f^* - \xi}{\sigma}\right)$</td><td>$\mu + \kappa\sigma$</td></tr>
+            <tr><td><strong>Measures</strong></td><td>Expected magnitude of improvement</td><td>Probability of any improvement</td><td>Optimistic upper bound on $f$</td></tr>
+            <tr><td><strong>Free parameter</strong></td><td>None (parameter-free)</td><td>$\xi$ (improvement margin)</td><td>$\kappa$ (exploration weight)</td></tr>
+            <tr><td><strong>Character</strong></td><td>Balanced (default)</td><td>Greedy / exploitative</td><td>Tuneable, principled exploration</td></tr>
+            <tr><td><strong>Regret bound</strong></td><td>Empirically strong</td><td>No formal bound</td><td>$O(\sqrt{T\gamma_T})$</td></tr>
+          </tbody>
+        </table>
+        <p class="reveal">The next slide visualises all three on the same GP posterior, so we can see how these theoretical differences translate into different sampling decisions.</p>
+      </div>
+      <span class="slide-num">20</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 21 — Acquisition comparison visual
+         ============================================= -->
+    <section class="slide img-slide">
+      <div class="slide-content">
+        <h2 class="reveal">EI, PI, and UCB on the Same Surrogate</h2>
+        <p class="reveal">All three acquisition functions are evaluated on the same GP posterior (top panel). Each bottom panel shows the acquisition landscape and a dashed line marking where it would place the <strong>next sample</strong>:</p>
+        <img src="assets/acq_comparison.png" alt="Side-by-side comparison of EI, PI, and UCB" class="slide-image tall reveal" />
+        <ul class="bullet-list reveal" style="margin-top: var(--element-gap);">
+          <li><strong>PI</strong> peaks sharply near the current best &mdash; it is the most exploitative</li>
+          <li><strong>UCB</strong> has a broader peak extending into uncertain regions &mdash; more explorative</li>
+          <li><strong>EI</strong> sits between the two, reflecting its balanced character</li>
+        </ul>
+      </div>
+      <span class="slide-num">21</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 22 — Choosing an AF
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <h2 class="reveal">Practical Guidance: Choosing an Acquisition Function</h2>
+        <p class="reveal">There is no universally best acquisition function &mdash; the right choice depends on the problem characteristics and your priorities:</p>
+        <table class="slide-table reveal">
+          <thead>
+            <tr><th>If you need&hellip;</th><th>Use</th><th>Why</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>A safe, general-purpose default</td><td><strong>EI</strong></td><td>Parameter-free, balances both signals, works well across problems</td></tr>
+            <tr><td>Fast convergence on a simple landscape</td><td><strong>PI</strong> (small $\xi$)</td><td>Aggressively exploits; converges quickly if the basin is easy to find</td></tr>
+            <tr><td>Robustness to multiple local optima</td><td><strong>UCB</strong> (high $\kappa$)</td><td>Strong exploration prevents premature convergence</td></tr>
+            <tr><td>Theoretical guarantees</td><td><strong>UCB</strong></td><td>Formal regret bounds under mild assumptions</td></tr>
+          </tbody>
+        </table>
+        <div class="note reveal">
+          <p>In practice, <strong>EI is the most widely used</strong> default. UCB is preferred in research settings where theoretical properties matter. We will now see how all of these fit into the complete BO algorithm.</p>
+        </div>
+      </div>
+      <span class="slide-num">22</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 23 — Section: Putting it Together
+         ============================================= -->
+    <section class="slide section-slide">
+      <div class="slide-content">
+        <span class="section-number reveal">04</span>
+        <div class="section-rule reveal"></div>
+        <h2 class="reveal">How It All Comes Together</h2>
+      </div>
+      <span class="slide-num">23</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 24 — Intro to the loop
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <h2 class="reveal">From Components to Algorithm</h2>
+        <p class="reveal">We have now covered the two building blocks &mdash; the <strong>surrogate model</strong> and the <strong>acquisition function</strong>. Bayesian Optimisation puts them together in a simple iterative loop:</p>
+        <ul class="bullet-list">
+          <li class="reveal"><strong>Step 1.</strong> Start with a small initial dataset (e.g. 3&ndash;5 random evaluations)</li>
+          <li class="reveal"><strong>Step 2.</strong> Fit the surrogate to all data collected so far &rarr; obtain $\mu(x)$ and $\sigma(x)$</li>
+          <li class="reveal"><strong>Step 3.</strong> Maximise the acquisition function to choose the next evaluation point $x_{n+1}$</li>
+          <li class="reveal"><strong>Step 4.</strong> Evaluate the expensive function at $x_{n+1}$ and add the result to the dataset</li>
+          <li class="reveal"><strong>Step 5.</strong> Go back to Step 2 until the evaluation budget is exhausted</li>
+        </ul>
+        <p class="reveal">Each iteration, the surrogate becomes more accurate and the acquisition function makes better-informed decisions. The next slide formalises this as pseudocode.</p>
+      </div>
+      <span class="slide-num">24</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 25 — The BO Algorithm (formal)
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <h2 class="reveal">The Bayesian Optimisation Algorithm</h2>
+        <div class="formula-block reveal" style="line-height: 2; font-family: var(--font-body); font-size: var(--body-size);">
+          <p><strong>Input:</strong> search space $\mathcal{X}$, budget $T$, acquisition function $\alpha$</p>
+          <p><strong>1.</strong>&ensp;Choose initial design $\{x_1, \ldots, x_{n_0}\}$ (e.g. Latin Hypercube) and evaluate $y_i = f(x_i)$</p>
+          <p><strong>2.</strong>&ensp;<strong>for</strong> $t = n_0 + 1$ <strong>to</strong> $T$ <strong>do</strong></p>
+          <p>&emsp;&emsp;<strong>a.</strong>&ensp;Fit GP to data $\mathcal{D}_{t-1} = \{(x_i, y_i)\}_{i=1}^{t-1}$</p>
+          <p>&emsp;&emsp;<strong>b.</strong>&ensp;Compute $\alpha(x)$ using GP posterior $\mu(x), \sigma(x)$</p>
+          <p>&emsp;&emsp;<strong>c.</strong>&ensp;$x_t = \arg\max_{x \in \mathcal{X}} \alpha(x)$</p>
+          <p>&emsp;&emsp;<strong>d.</strong>&ensp;$y_t = f(x_t) + \varepsilon$ &emsp; <em>&larr; the expensive evaluation</em></p>
+          <p>&emsp;&emsp;<strong>e.</strong>&ensp;$\mathcal{D}_t = \mathcal{D}_{t-1} \cup \{(x_t, y_t)\}$</p>
+          <p><strong>3.</strong>&ensp;<strong>Return</strong> $x^* = \arg\max_{x_i \in \mathcal{D}_T} y_i$</p>
+        </div>
+      </div>
+      <span class="slide-num">25</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 26 — Visual: EI in action
+         ============================================= -->
+    <section class="slide img-slide">
+      <div class="slide-content">
+        <h2 class="reveal">One BO Iteration Visualised</h2>
+        <p class="reveal">This figure shows steps 2a&ndash;2c of the algorithm in action. The <strong>top panel</strong> is the GP surrogate (step 2a), and the <strong>bottom panel</strong> is the EI acquisition function (step 2b). The green dashed line marks $x_{n+1} = \arg\max \text{EI}(x)$ (step 2c):</p>
+        <img src="assets/ei_acquisition.png" alt="GP surrogate with EI acquisition function" class="slide-image reveal" />
+        <ul class="bullet-list reveal" style="margin-top: var(--element-gap);">
+          <li>EI is high in the region around $x \approx 0.3$ where the mean is promising <strong>and</strong> uncertainty remains moderate</li>
+          <li>EI is near zero at the observed points (no uncertainty = no expected improvement)</li>
+        </ul>
+      </div>
+      <span class="slide-num">26</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 27 — Iteration progression
+         ============================================= -->
+    <section class="slide img-slide">
+      <div class="slide-content">
+        <h2 class="reveal">How the Surrogate Evolves Over Iterations</h2>
+        <p class="reveal">The grid below shows the GP surrogate at iterations 1, 3, 5, and 7. At each step a new observation (green star) is added, and the surrogate is re-fitted:</p>
+        <img src="assets/bo_iterations.png" alt="2x2 grid showing BO iterations 1, 3, 5, 7" class="slide-image wide reveal" />
+        <ul class="bullet-list reveal" style="margin-top: var(--element-gap);">
+          <li>The <strong>uncertainty band shrinks</strong> progressively as data accumulates</li>
+          <li>The <strong>GP mean converges</strong> toward the true function (dashed black line)</li>
+          <li>New samples <strong>migrate toward the optimum</strong> &mdash; the algorithm self-focuses</li>
+        </ul>
+      </div>
+      <span class="slide-num">27</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 28 — Section: Code Example
+         ============================================= -->
+    <section class="slide section-slide">
+      <div class="slide-content">
+        <span class="section-number reveal">05</span>
+        <div class="section-rule reveal"></div>
+        <h2 class="reveal">Code Example:<br />BO on a 1-D Test Function</h2>
+      </div>
+      <span class="slide-num">28</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 29 — Code example intro
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <h2 class="reveal">What the Notebook Demonstrates</h2>
+        <p class="reveal">The accompanying Jupyter notebook (<code>BayesianOptimisation_Tutorial.ipynb</code>) implements a full BO pipeline from scratch using only <code>numpy</code>, <code>scikit-learn</code>, and <code>scipy</code>. The walkthrough follows the same structure as the algorithm above:</p>
+        <ul class="bullet-list">
+          <li class="reveal"><strong>Step 0:</strong> Define a 1-D test function as a stand-in for an expensive black-box</li>
+          <li class="reveal"><strong>Step 1:</strong> Draw 3 random initial samples</li>
+          <li class="reveal"><strong>Step 2:</strong> Fit a GP surrogate (<code>GaussianProcessRegressor</code> with a Mat&eacute;rn kernel)</li>
+          <li class="reveal"><strong>Step 3:</strong> Implement the EI acquisition function as a Python function</li>
+          <li class="reveal"><strong>Step 4:</strong> Run the BO loop for 7 iterations, plotting the surrogate at each step</li>
+          <li class="reveal"><strong>Step 5:</strong> Compare BO against random search, and compare EI vs. PI vs. UCB</li>
+        </ul>
+        <p class="reveal">The following slides show key code snippets alongside their output graphs.</p>
+      </div>
+      <span class="slide-num">29</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 30 — Objective function code
+         ============================================= -->
+    <section class="slide img-slide">
+      <div class="slide-content">
+        <h2 class="reveal">Step 0: The Objective Function</h2>
+        <div class="two-col reveal">
+          <div>
+            <div class="code-block">
+              <span class="kw">def</span> <span class="fn">objective</span>(x):<br />
+              &nbsp;&nbsp;<span class="cm">"""Expensive in real life."""</span><br />
+              &nbsp;&nbsp;<span class="kw">return</span> -np.sin(<span class="num">3</span>*x) - x**<span class="num">2</span> + <span class="num">0.7</span>*x
+            </div>
+            <p style="margin-top: var(--element-gap);">A known test function $f(x) = -\sin(3x) - x^2 + 0.7x$ on $[-2, 2]$, acting as a stand-in for an expensive black-box. In practice, we would <strong>never</strong> see this curve &mdash; only point evaluations.</p>
+            <p style="margin-top: var(--element-gap);">The graph shows the function has a single global maximum near $x \approx 0.3$ and a local maximum near $x \approx -1.7$.</p>
+          </div>
+          <img src="assets/objective_function.png" alt="Objective function" class="slide-image" />
+        </div>
+      </div>
+      <span class="slide-num">30</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 31 — Initial samples + surrogate
+         ============================================= -->
+    <section class="slide img-slide">
+      <div class="slide-content">
+        <h2 class="reveal">Step 1&ndash;2: Initial Samples &amp; Surrogate Fit</h2>
+        <div class="two-col reveal">
+          <div>
+            <div class="code-block" style="margin-bottom: var(--element-gap);">
+              <span class="cm"># 3 random initial points</span><br />
+              X_init = rng.uniform(-<span class="num">2</span>, <span class="num">2</span>, size=<span class="num">3</span>)<br />
+              y_init = <span class="fn">objective</span>(X_init)<br /><br />
+              <span class="cm"># Fit GP surrogate</span><br />
+              gp = <span class="fn">GaussianProcessRegressor</span>(<br />
+              &nbsp;&nbsp;kernel=<span class="fn">Matern</span>(nu=<span class="num">2.5</span>),<br />
+              &nbsp;&nbsp;alpha=<span class="num">1e-6</span>)<br />
+              gp.<span class="fn">fit</span>(X_init, y_init)
+            </div>
+            <p><strong>Top:</strong> 3 random samples (red dots) on the true curve. <strong>Bottom:</strong> the GP surrogate fitted to those 3 points. With so little data, the surrogate is highly uncertain over most of the domain.</p>
+          </div>
+          <div>
+            <img src="assets/initial_samples.png" alt="Initial samples" class="slide-image compact" style="margin-bottom: var(--element-gap);" />
+            <img src="assets/gp_surrogate.png" alt="GP surrogate" class="slide-image compact" />
+          </div>
+        </div>
+      </div>
+      <span class="slide-num">31</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 32 — EI implementation
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <h2 class="reveal">Step 3: Computing Expected Improvement</h2>
+        <div class="code-block reveal" style="line-height: 1.6;">
+          <span class="kw">def</span> <span class="fn">expected_improvement</span>(X, gp, f_best):<br />
+          &nbsp;&nbsp;mu, sigma = gp.<span class="fn">predict</span>(X, return_std=<span class="kw">True</span>)<br />
+          &nbsp;&nbsp;sigma = np.<span class="fn">maximum</span>(sigma, <span class="num">1e-9</span>)&nbsp;&nbsp;<span class="cm"># avoid division by zero</span><br />
+          &nbsp;&nbsp;Z = (mu - f_best) / sigma<br />
+          &nbsp;&nbsp;ei = (mu - f_best) * norm.<span class="fn">cdf</span>(Z) + sigma * norm.<span class="fn">pdf</span>(Z)<br />
+          &nbsp;&nbsp;<span class="kw">return</span> ei
+        </div>
+        <p class="reveal" style="margin-top: var(--element-gap);">This is a direct translation of the closed-form EI formula into code. Note how each line maps to the maths:</p>
+        <ul class="bullet-list">
+          <li class="reveal"><code>mu - f_best</code> computes $\mu(x) - f^*$ &mdash; the predicted improvement in the mean</li>
+          <li class="reveal"><code>Z = (mu - f_best) / sigma</code> computes the standardised score $Z$ &mdash; the key to balancing explore and exploit</li>
+          <li class="reveal"><code>norm.cdf(Z)</code> and <code>norm.pdf(Z)</code> are $\Phi(Z)$ and $\phi(Z)$ from <code>scipy.stats</code></li>
+        </ul>
+      </div>
+      <span class="slide-num">32</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 33 — BO loop code
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <h2 class="reveal">Step 4: The Complete BO Loop</h2>
+        <div class="code-block reveal" style="line-height: 1.6;">
+          <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n_iterations):<br />
+          &nbsp;&nbsp;gp = <span class="fn">fit_gp</span>(X_obs, y_obs)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># step 2a: fit surrogate</span><br />
+          &nbsp;&nbsp;f_best = np.<span class="fn">max</span>(y_obs)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># current incumbent</span><br />
+          &nbsp;&nbsp;ei = <span class="fn">expected_improvement</span>(X, gp, f_best)&nbsp;<span class="cm"># step 2b: compute alpha</span><br />
+          &nbsp;&nbsp;x_new = X[np.<span class="fn">argmax</span>(ei)]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># step 2c: argmax alpha</span><br />
+          &nbsp;&nbsp;y_new = <span class="fn">objective</span>(x_new)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># step 2d: EXPENSIVE call</span><br />
+          &nbsp;&nbsp;X_obs = np.<span class="fn">vstack</span>([X_obs, x_new])&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># step 2e: update data</span><br />
+          &nbsp;&nbsp;y_obs = np.<span class="fn">vstack</span>([y_obs, y_new])
+        </div>
+        <p class="reveal" style="margin-top: var(--element-gap);">Each iteration maps directly to steps 2a&ndash;2e of the pseudocode. The inline comments show the correspondence. The entire BO engine is under 10 lines of Python.</p>
+        <div class="callout reveal" style="margin-top: var(--element-gap);">
+          <p>Result after 7 iterations (10 total evaluations): $f(x^*) = 0.5003$ &mdash; matching the true optimum to 4 decimal places.</p>
+        </div>
+      </div>
+      <span class="slide-num">33</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 34 — BO vs Random
+         ============================================= -->
+    <section class="slide img-slide">
+      <div class="slide-content">
+        <h2 class="reveal">BO vs. Random Search</h2>
+        <p class="reveal">To demonstrate the value of BO, the notebook runs 50 independent random-search trials with the <strong>same evaluation budget</strong> (10 calls) and compares convergence:</p>
+        <img src="assets/bo_vs_random.png" alt="BO vs Random Search convergence" class="slide-image reveal" />
+        <ul class="bullet-list reveal" style="margin-top: var(--element-gap);">
+          <li><strong>BO</strong> (blue) reaches the optimum in ~6 evaluations &mdash; deterministic given the initial samples</li>
+          <li><strong>Random search</strong> (red band = 10th&ndash;90th percentile) has high variance and often fails within budget</li>
+          <li>The gap widens dramatically on more expensive or higher-dimensional problems</li>
+        </ul>
+      </div>
+      <span class="slide-num">34</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 35 — Sampling strategies
+         ============================================= -->
+    <section class="slide img-slide">
+      <div class="slide-content">
+        <h2 class="reveal">Where Did Each Acquisition Function Sample?</h2>
+        <p class="reveal">The notebook also runs the full BO loop independently with EI, PI, and UCB (all from the same 3 initial points). The numbered diamonds show where each method chose to evaluate, in order:</p>
+        <img src="assets/sample_locations.png" alt="Sample locations by acquisition function" class="slide-image wide reveal" />
+        <ul class="bullet-list reveal" style="margin-top: var(--element-gap);">
+          <li><strong>PI</strong> clusters tightly near the region it first found promising &mdash; pure exploitation, as predicted by the theory</li>
+          <li><strong>UCB</strong> ($\kappa = 2$) spreads broadly, probing uncertain regions even when the mean is low</li>
+          <li><strong>EI</strong> strikes a middle ground: it explores somewhat but converges toward the optimum</li>
+        </ul>
+      </div>
+      <span class="slide-num">35</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 36 — Convergence comparison
+         ============================================= -->
+    <section class="slide img-slide">
+      <div class="slide-content">
+        <h2 class="reveal">Convergence: EI vs. PI vs. UCB</h2>
+        <p class="reveal">Finally, the notebook plots the <strong>best value found so far</strong> as a function of the number of evaluations for all three acquisition functions:</p>
+        <img src="assets/convergence_comparison.png" alt="Convergence curves for EI, PI, and UCB" class="slide-image reveal" />
+        <ul class="bullet-list reveal" style="margin-top: var(--element-gap);">
+          <li>All three reach the optimum within budget on this simple 1-D problem &mdash; differences would be larger on harder problems</li>
+          <li><strong>EI and UCB</strong> converge smoothly; <strong>PI</strong> can plateau before catching up (visible stall around evaluation 5&ndash;6)</li>
+          <li>The grey band marks the 3 initial samples &mdash; all methods start from the same baseline</li>
+        </ul>
+      </div>
+      <span class="slide-num">36</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 37 — Final result
+         ============================================= -->
+    <section class="slide img-slide">
+      <div class="slide-content">
+        <h2 class="reveal">Final Result</h2>
+        <p class="reveal">The figure below shows the GP surrogate <strong>after all 7 BO iterations</strong> (10 total evaluations), using EI as the acquisition function. Red circles are the initial samples; green diamonds are the points selected by BO; the gold star is the best observation:</p>
+        <img src="assets/final_result.png" alt="Final GP after all BO iterations" class="slide-image reveal" />
+        <ul class="bullet-list reveal" style="margin-top: var(--element-gap);">
+          <li>The surrogate now closely tracks the true function across the entire domain</li>
+          <li>The confidence band has collapsed nearly everywhere &mdash; very little uncertainty remains</li>
+          <li>The best found value $f(x^*) = 0.5003$ matches the true optimum to 4 decimal places</li>
+        </ul>
+      </div>
+      <span class="slide-num">37</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 38 — When to use BO
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <h2 class="reveal">When to Use Bayesian Optimisation</h2>
+        <div class="two-col reveal">
+          <div>
+            <h3 style="color: #2a7d2a;">Good fit</h3>
+            <ul class="bullet-list">
+              <li>Expensive evaluations (simulations, physical experiments)</li>
+              <li>Low-dimensional input space (typically $d < 20$)</li>
+              <li>Smooth, continuous objective</li>
+              <li>Black-box: no gradients available</li>
+              <li>Budget of 10&ndash;100 evaluations</li>
+            </ul>
+          </div>
+          <div>
+            <h3 style="color: var(--accent);">Poor fit</h3>
+            <ul class="bullet-list">
+              <li>Cheap evaluations (can afford $10^3$+ calls)</li>
+              <li>Very high-dimensional ($d > 20$): GP cost is $O(n^3)$</li>
+              <li>Highly discrete or combinatorial problems</li>
+              <li>Gradient information available (use gradient descent)</li>
+              <li>Extremely noisy with no structure</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <span class="slide-num">38</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 39 — Key Takeaways
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <h2 class="reveal">Key Takeaways</h2>
+        <ul class="bullet-list">
+          <li class="reveal"><strong>Bayesian Optimisation</strong> is a sequential, model-based strategy for optimising expensive black-box functions using as few evaluations as possible</li>
+          <li class="reveal">The <strong>surrogate model</strong> (typically a GP) provides predictions with calibrated uncertainty, enabling intelligent sampling</li>
+          <li class="reveal"><strong>Acquisition functions</strong> formalise the exploration&ndash;exploitation trade-off:
+            <ul class="bullet-list" style="margin-top: 0.3em; margin-left: 0.5em;">
+              <li><strong>EI</strong>: expected magnitude of improvement (balanced, parameter-free)</li>
+              <li><strong>PI</strong>: probability of improvement (greedy, tuneable via $\xi$)</li>
+              <li><strong>UCB</strong>: optimistic bound on $f$ (principled, tuneable via $\kappa$)</li>
+            </ul>
+          </li>
+          <li class="reveal">The BO loop &mdash; <strong>fit, decide, evaluate, update</strong> &mdash; converges to the optimum in very few evaluations compared to uninformed methods</li>
+        </ul>
+      </div>
+      <span class="slide-num">39</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 40 — References
+         ============================================= -->
+    <section class="slide content-slide">
+      <div class="slide-content">
+        <h2 class="reveal">References &amp; Further Reading</h2>
+        <ul class="bullet-list">
+          <li class="reveal">Kushner, H.J. (1964). <em>A New Method of Locating the Maximum Point of an Arbitrary Multipeak Curve in the Presence of Noise.</em> Journal of Basic Engineering. &mdash; <strong>introduced PI</strong></li>
+          <li class="reveal">Mockus, J. (1975). <em>On Bayesian Methods for Seeking the Extremum.</em> Optimization Techniques IFIP. &mdash; <strong>introduced EI</strong></li>
+          <li class="reveal">Srinivas, N. et al. (2010). <em>Gaussian Process Optimization in the Bandit Setting: No Regret and Experimental Design.</em> ICML. &mdash; <strong>GP-UCB regret bounds</strong></li>
+          <li class="reveal">Brochu, E., Cora, V.M. &amp; de Freitas, N. (2010). <em>A Tutorial on Bayesian Optimization.</em></li>
+          <li class="reveal">Shahriari, B. et al. (2016). <em>Taking the Human Out of the Loop: A Review of Bayesian Optimization.</em> Proc. IEEE.</li>
+          <li class="reveal">Frazier, P.I. (2018). <em>A Tutorial on Bayesian Optimization.</em> arXiv:1807.02811.</li>
+        </ul>
+      </div>
+      <span class="slide-num">40</span>
+    </section>
+
+    <!-- =============================================
+         SLIDE 41 — End
+         ============================================= -->
+    <section class="slide title-slide">
+      <div class="slide-content">
+        <h1 class="reveal">Thank You</h1>
+        <div class="title-rule reveal"></div>
+        <p class="title-meta reveal">Questions?</p>
+      </div>
+      <span class="slide-num">41</span>
+    </section>
+
+    <script>
+      class SlidePresentation {
+        constructor() {
+          this.slides = document.querySelectorAll(".slide");
+          this.currentSlide = 0;
+          this.setupIntersectionObserver();
+          this.setupKeyboardNav();
+          this.setupTouchNav();
+          this.setupWheelNav();
+          this.setupProgressBar();
+          this.setupNavDots();
+        }
+        setupIntersectionObserver() {
+          const obs = new IntersectionObserver((entries) => {
+            entries.forEach((e) => {
+              if (e.isIntersecting) {
+                e.target.classList.add("visible");
+                const i = Array.from(this.slides).indexOf(e.target);
+                if (i !== -1) { this.currentSlide = i; this.updateNavDots(); this.updateProgressBar(); }
+              }
+            });
+          }, { threshold: 0.5 });
+          this.slides.forEach((s) => obs.observe(s));
+        }
+        setupKeyboardNav() {
+          document.addEventListener("keydown", (e) => {
+            if (["ArrowDown","ArrowRight"," ","PageDown"].includes(e.key)) { e.preventDefault(); this.goTo(this.currentSlide + 1); }
+            else if (["ArrowUp","ArrowLeft","PageUp"].includes(e.key)) { e.preventDefault(); this.goTo(this.currentSlide - 1); }
+            else if (e.key === "Home") { e.preventDefault(); this.goTo(0); }
+            else if (e.key === "End") { e.preventDefault(); this.goTo(this.slides.length - 1); }
+          });
+        }
+        setupTouchNav() {
+          let sy = 0;
+          document.addEventListener("touchstart", (e) => { sy = e.touches[0].clientY; }, { passive: true });
+          document.addEventListener("touchend", (e) => { const dy = sy - e.changedTouches[0].clientY; if (Math.abs(dy) > 50) this.goTo(this.currentSlide + (dy > 0 ? 1 : -1)); }, { passive: true });
+        }
+        setupWheelNav() {
+          let last = 0;
+          document.addEventListener("wheel", (e) => { const now = Date.now(); if (now - last < 800) return; last = now; if (e.deltaY > 0) this.goTo(this.currentSlide + 1); else if (e.deltaY < 0) this.goTo(this.currentSlide - 1); }, { passive: true });
+        }
+        setupProgressBar() { this.progressBar = document.getElementById("progressBar"); this.updateProgressBar(); }
+        setupNavDots() {
+          const c = document.getElementById("navDots"); c.innerHTML = "";
+          this.slides.forEach((_, i) => { const d = document.createElement("button"); d.className = "nav-dot" + (i === 0 ? " active" : ""); d.setAttribute("aria-label", `Slide ${i+1}`); d.addEventListener("click", () => this.goTo(i)); c.appendChild(d); });
+          this.dots = c.querySelectorAll(".nav-dot");
+        }
+        updateProgressBar() { this.progressBar.style.width = ((this.currentSlide + 1) / this.slides.length * 100) + "%"; }
+        updateNavDots() { if (this.dots) this.dots.forEach((d, i) => d.classList.toggle("active", i === this.currentSlide)); }
+        goTo(i) { if (i < 0 || i >= this.slides.length) return; this.currentSlide = i; this.slides[i].scrollIntoView({ behavior: "smooth" }); this.updateNavDots(); this.updateProgressBar(); }
+      }
+      new SlidePresentation();
+    </script>
+  </body>
+</html>
