@@ -646,12 +646,12 @@
     <section class="slide img-slide">
       <div class="slide-content">
         <h2 class="reveal">EI, PI, and UCB on the Same Surrogate</h2>
-        <p class="reveal">All three acquisition functions are evaluated on the same GP posterior (top panel). Each bottom panel shows the acquisition landscape and a dashed line marking where it would place the <strong>next sample</strong>:</p>
+        <p class="reveal">All three acquisition functions are evaluated on the same GP posterior fitted to 4 observations (top panel). Each bottom panel shows the acquisition landscape and a dashed line marking where it would place the <strong>next sample</strong>:</p>
         <img src="assets/acq_comparison.png" alt="Side-by-side comparison of EI, PI, and UCB" class="slide-image tall reveal" />
         <ul class="bullet-list reveal" style="margin-top: var(--element-gap);">
-          <li><strong>PI</strong> peaks sharply near the current best &mdash; it is the most exploitative</li>
-          <li><strong>UCB</strong> has a broader peak extending into uncertain regions &mdash; more explorative</li>
-          <li><strong>EI</strong> sits between the two, reflecting its balanced character</li>
+          <li><strong>PI</strong> (red) peaks closest to the current best observation &mdash; it is the most exploitative</li>
+          <li><strong>UCB</strong> (blue) peaks furthest into the uncertain region to the right &mdash; the most explorative</li>
+          <li><strong>EI</strong> (green) sits between the two, balancing mean and uncertainty</li>
         </ul>
       </div>
       <span class="slide-num">21</span>
