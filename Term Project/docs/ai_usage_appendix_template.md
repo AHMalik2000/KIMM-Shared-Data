@@ -4,48 +4,43 @@ Maximum length: 1 page.
 
 ## Tools Used
 
-List each AI tool used, such as ChatGPT, Codex, Copilot, Claude, or Gemini.
+- Codex was used for project planning, document review, and document refinement.
+- Add any other AI tools used by the team before submission.
 
 ## What AI Was Used For
 
-Briefly describe the work supported by AI, such as:
-
-- project planning
-- PyTorch code drafting
-- debugging tensor shape errors
-- metric or visualization code
-- explanation of LSTM, attention, or positional encoding
-- report editing
+- Drafting and reviewing the project plan, report outline, presentation outline, and AI Usage Appendix structure.
+- Checking the documents against the assignment requirements, including dataset-source consistency, test-set use, ablation requirements, failure analysis, and AI transparency.
+- Future entries to add if used: PyTorch code drafting, tensor-shape debugging, metric code, visualization code, concept explanations, or report editing.
 
 ## Incorrect, Incomplete, Or Misleading AI Outputs
 
-Record any AI output that required correction. Examples:
+Record any AI output that required correction. Current known issues and examples to watch for:
 
-- code that used the test set during model selection
-- code that mixed dataset sources
-- incorrect tensor shapes
-- missing padding masks
-- unclear or unsupported interpretation of results
+- The team must reject or correct any code that uses the test set during model selection.
+- The team must reject or correct any code that mixes Hugging Face, TorchText, and raw CSV dataset sources.
+- The team must check for tensor shape errors, missing padding masks, and unsupported result interpretations.
+- Add specific corrections encountered during notebook implementation.
 
 ## Team Modifications
 
-Describe what the team changed after reviewing AI output, such as:
+Describe what the team changed after reviewing AI output. Current and expected examples:
 
-- corrected data split logic
-- verified label indices
-- added train-only vocabulary construction
-- adjusted model hyperparameters
-- rewrote explanations using course concepts
+- Kept the experiment constrained to one dataset source: Hugging Face `fancyzhx/ag_news`.
+- Required train-only vocabulary construction and official test-set use only for final evaluation.
+- Required both models to use the same preprocessing, vocabulary, metrics, and comparable training budget.
+- Add later: corrected data split logic, verified label indices, adjusted hyperparameters, or rewrote explanations using course concepts.
 
 ## Team Decisions
 
-List decisions made by the team, not by AI, such as:
+List decisions made by the team, not by AI. Current decisions to confirm before submission:
 
-- final ablation choice
-- final model configurations
-- final interpretation of results
-- examples selected for failure analysis
+- Main comparison: LSTM classifier vs Transformer Encoder classifier trained from scratch.
+- Dataset source: Hugging Face `datasets.load_dataset("fancyzhx/ag_news")`.
+- Required ablation: dataset size at 25%, 50%, and 100%.
+- Main maximum sequence length: 128, with 128 vs 256 kept as an optional extension.
+- Add later: final model configurations, final interpretation of results, and examples selected for failure analysis.
 
 ## Effect Of AI Use
 
-Briefly explain how AI affected the project workflow, including benefits and limitations.
+AI helped organize the project requirements, identify required deliverables, and turn the assignment into a controlled experiment plan. The team remains responsible for running the notebook, verifying outputs, correcting mistakes, and writing final claims based only on inspected results.

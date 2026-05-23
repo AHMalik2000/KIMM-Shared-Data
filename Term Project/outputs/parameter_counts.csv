@@ -1,0 +1,3 @@
+model,trainable_parameters
+LSTM,2825220
+Transformer Encoder,2973444

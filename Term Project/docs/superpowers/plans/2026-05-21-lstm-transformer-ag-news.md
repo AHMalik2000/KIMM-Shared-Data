@@ -99,7 +99,7 @@ Run the setup cells and confirm the selected device prints without error.
 - [ ] **Step 1: Load the dataset**
 
 ```python
-raw_dataset = load_dataset("ag_news")
+raw_dataset = load_dataset("fancyzhx/ag_news")
 split_dataset = raw_dataset["train"].train_test_split(test_size=0.1, seed=SEED)
 
 train_data = split_dataset["train"]

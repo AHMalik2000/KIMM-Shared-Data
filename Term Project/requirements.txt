@@ -1,0 +1,9 @@
+datasets
+jupyter
+matplotlib
+numpy
+pandas
+pip-system-certs
+scikit-learn
+seaborn
+torch

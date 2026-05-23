@@ -1,0 +1,9 @@
+artifact,purpose
+parameter_counts.csv,Trainable parameter count table
+main_results.csv,Validation and final test metrics
+dataset_size_ablation.csv,Required dataset-size ablation results
+sequence_length_ablation.csv,Optional sequence-length ablation results
+selected_misclassifications.csv,Failure-analysis examples
+main_loss_curves.png,Training and validation loss curves
+lstm_confusion_matrix.png,LSTM final test confusion matrix
+transformer_confusion_matrix.png,Transformer Encoder final test confusion matrix
