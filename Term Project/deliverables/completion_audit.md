@@ -19,6 +19,7 @@
 | One-page plan/summary | `docs/one_page_project_summary.md`; `deliverables/ag_news_one_page_summary.docx` |
 | Final report | `docs/final_report.md`; `deliverables/ag_news_final_report.docx` |
 | Final presentation | `docs/final_presentation_script.md`; `deliverables/ag_news_lstm_transformer_presentation.pptx` |
+| Reference report/deck format and tone | Report follows the reference report pattern: Table of Figures, Motivation, Background, Model Development, Experimental Verification, Interpretation, Conclusion, Appendix/References. Presentation follows the reference deck pattern: 4:3 academic seminar slides, title slide, Table of Contents, top blue rule, small slide/page markers, and concise technical bullets. |
 
 ## Generated Deliverables
 
@@ -32,5 +33,6 @@
 
 - DOCX/PPTX files were structurally verified with `python-docx` and `python-pptx`.
 - The final report DOCX contains 6 tables and 3 embedded figures.
-- The presentation PPTX contains 10 slides and 3 embedded result figures.
-- Full visual rendering with the bundled DOCX renderer could not be completed because LibreOffice/`soffice` is not installed in the current environment.
+- The presentation PPTX contains 11 slides and 3 embedded result figures.
+- Microsoft PowerPoint rendered the updated presentation to PNG successfully for visual QA.
+- Full visual rendering of the DOCX files could not be completed because Word COM opened the document but hung during PDF export, and LibreOffice/`soffice` is not installed in the current environment.

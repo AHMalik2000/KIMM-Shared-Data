@@ -1,22 +1,42 @@
 # LSTM vs Transformer Encoder for AG News Classification
 
-## 1. Introduction
+## Table of Figures
 
-This project compares two neural text classifiers trained from scratch on the AG News four-class classification task: a bidirectional LSTM classifier and a Transformer Encoder classifier. The goal is not simply to maximize accuracy. The project evaluates how recurrent sequence modeling and self-attention differ in classification performance, training behavior, convergence patterns, data efficiency, and failure cases.
+Figure 1: Training and validation loss curves for the main comparison
 
-Both models use the same dataset source, split procedure, tokenizer, vocabulary, maximum sequence length, optimizer family, training budget, and evaluation metrics. This controlled setup makes the comparison more informative than a raw leaderboard-style accuracy result. The main research question is: under a shared preprocessing and training pipeline, how do the LSTM and Transformer Encoder differ on AG News classification?
+Figure 2: LSTM final test confusion matrix
 
-## 2. Dataset And Preprocessing
+Figure 3: Transformer Encoder final test confusion matrix
 
-The project uses Hugging Face `fancyzhx/ag_news` as the only dataset source. The official training split was divided into 108,000 training examples and 12,000 validation examples using `train_test_split(test_size=0.1, seed=42)`. The official test split contains 7,600 examples and was reserved for final evaluation only.
+Table 1: Trainable parameter counts
 
-The four labels are `World`, `Sports`, `Business`, and `Sci/Tech`. The official test split is balanced, with 1,900 examples per class. The training split is also nearly balanced: 26,991 World, 26,966 Sports, 27,100 Business, and 26,943 Sci/Tech examples. Labels were verified as integer class indices `0, 1, 2, 3`, which matches the requirement for `torch.nn.CrossEntropyLoss`.
+Table 2: Final model configuration and hyperparameters
 
-Texts were tokenized with a reproducible regular-expression tokenizer. The vocabulary was built only from the training split to avoid vocabulary leakage. The vocabulary size was capped at 20,000 tokens, with reserved indices for padding and unknown tokens. The main comparison used a maximum sequence length of 128 tokens. Both models received the same padded and truncated token IDs, and padding masks were used during LSTM pooling and Transformer attention.
+Table 3: Main validation and test results
 
-## 3. Models
+Table 4: Dataset-size ablation results
 
-The LSTM classifier uses an embedding layer, a one-layer bidirectional LSTM, masked mean pooling, dropout, and a final linear classifier. The Transformer Encoder classifier uses an embedding layer, learned positional embeddings, two Transformer Encoder layers, four attention heads, feedforward dimension 512, masked mean pooling, dropout, and a final linear classifier. Both models were trained from scratch, without pretrained embeddings or pretrained language models.
+Table 5: Optional sequence-length ablation results
+
+Table 6: Selected misclassified examples
+
+## Motivation
+
+Text classification is one of the standard ways to evaluate whether a neural network can turn raw language into useful categories. In this report, I compare an LSTM classifier and a Transformer Encoder classifier on the same AG News task. The purpose is not only to see which model gives a slightly higher accuracy, but to evaluate how the two architectures behave when the dataset, preprocessing, training budget, and metrics are controlled.
+
+The comparison is interesting because the two models represent different assumptions about sequence data. The LSTM reads the text recurrently and carries information through a hidden state. The Transformer Encoder uses self-attention, allowing every token to interact with other tokens directly. In theory, the Transformer should have more flexible global context modeling, while the LSTM may be more stable when the amount of data is reduced.
+
+## Background
+
+AG News is a four-class news classification dataset. Each input is a short news text, and the model predicts one of four categories: `World`, `Sports`, `Business`, or `Sci/Tech`. The project uses Hugging Face `fancyzhx/ag_news` as the only dataset source. The official training split was divided into 108,000 training examples and 12,000 validation examples using `train_test_split(test_size=0.1, seed=42)`. The official test split contains 7,600 examples and was reserved for final evaluation only.
+
+The test split is balanced, with 1,900 examples per class. The training split is also nearly balanced: 26,991 World, 26,966 Sports, 27,100 Business, and 26,943 Sci/Tech examples. Labels were verified as integer class indices `0, 1, 2, 3`, which matches the requirement for `torch.nn.CrossEntropyLoss`.
+
+For preprocessing, the text was tokenized with a reproducible regular-expression tokenizer. The vocabulary was built only from the training split to avoid vocabulary leakage. The vocabulary size was capped at 20,000 tokens, with reserved indices for padding and unknown tokens. The main comparison used a maximum sequence length of 128 tokens. Both models received the same padded and truncated token IDs, and padding masks were used during LSTM pooling and Transformer attention.
+
+## Model Development
+
+The first model is a bidirectional LSTM classifier. It uses an embedding layer, a one-layer bidirectional LSTM, masked mean pooling, dropout, and a final linear classifier. The second model is a Transformer Encoder classifier. It uses an embedding layer, learned positional embeddings, two Transformer Encoder layers, four attention heads, feedforward dimension 512, masked mean pooling, dropout, and a final linear classifier. Both models were trained from scratch, without pretrained embeddings or pretrained language models.
 
 | Model | Trainable parameters |
 | --- | --- |
@@ -35,9 +55,9 @@ The LSTM classifier uses an embedding layer, a one-layer bidirectional LSTM, mas
 | Optimizer / learning rate | Adam / 1e-3 | Adam / 1e-3 |
 | Epochs / batch size | 6 / 64 | 6 / 64 |
 
-The parameter counts are reasonably comparable for an introductory architecture comparison. The Transformer Encoder has about 5.2% more trainable parameters than the LSTM, so the report treats its small final metric advantage cautiously.
+The parameter counts are reasonably comparable for this assignment. The Transformer Encoder has about 5.2% more trainable parameters than the LSTM, so I treat its small final metric advantage cautiously.
 
-## 4. Experiments
+## Experimental Verification
 
 The main comparison trained both models for 6 epochs using Adam, learning rate `1e-3`, batch size 64, dropout 0.2, seed 42, and CPU execution. The evaluation metrics were accuracy and macro F1-score. Macro F1 was included because AG News has multiple classes and the assignment requires class-sensitive evaluation, even though the dataset is nearly balanced.
 
@@ -45,7 +65,7 @@ The required ablation changed one major factor: the fraction of training data. T
 
 An optional extension compared maximum sequence lengths of 128 and 256 tokens. This tested whether longer context improved validation performance enough to justify the additional training cost.
 
-## 5. Results
+## Results and Interpretation
 
 | Model | Split | Loss | Accuracy | Macro F1 |
 | --- | --- | --- | --- | --- |
@@ -68,7 +88,7 @@ Figures used for the final report:
 
 ![Transformer Encoder final test confusion matrix](../outputs/transformer_confusion_matrix.png)
 
-## 6. Ablation Study
+## Ablation Study
 
 Hypothesis: the LSTM will be more stable with limited training data, while the Transformer Encoder will benefit more from the full dataset. The changed variable was training-set fraction. The controlled variables were dataset source, train/validation split, tokenizer, vocabulary, maximum sequence length, optimizer, learning rate, batch size, epoch count, metrics, and validation evaluation.
 
@@ -94,7 +114,7 @@ The optional sequence-length ablation is shown below.
 
 Increasing maximum sequence length from 128 to 256 did not improve validation performance. Both models performed worse at 256 tokens. Under the current training budget and architecture sizes, longer context added cost without improving classification quality.
 
-## 7. Failure Analysis
+## Failure Analysis
 
 The table below gives six representative misclassified test examples. It includes cases missed by both models, cases missed only by the LSTM, and cases missed only by the Transformer Encoder.
 
@@ -109,8 +129,18 @@ The table below gives six representative misclassified test examples. It include
 
 The selected errors show that the two models often fail on semantic boundary cases. Some examples contain surface words strongly associated with a different news section, such as an Olympics item labeled World but predicted as Sports by both models. Other examples involve technology companies or IPOs, where Business and Sci/Tech labels overlap. The models therefore fail similarly when the text has ambiguous section cues, but they also show different single-model errors: the LSTM misread some science/world-style items, while the Transformer misread some short Sci/Tech items as Business.
 
-## 8. Conclusion
+## Conclusion
 
 Both from-scratch models performed well on AG News under the controlled setup, reaching about 91.2% final test accuracy. The Transformer Encoder achieved the best final test metrics, but only by a small margin. The LSTM was stronger in lower-data ablation settings, while the Transformer Encoder benefited more from the full training set.
 
 The required dataset-size ablation supports the original data-efficiency hypothesis. The optional sequence-length ablation showed that simply increasing maximum sequence length from 128 to 256 did not improve validation metrics. The most reasonable next experiment would be to tune early stopping or regularization, because both models show overfitting by the final epoch.
+
+## Appendix
+
+The complete notebook and generated output files are included in the project repository. The AI Usage Appendix is provided as a separate required appendix and also included in the combined report deliverable.
+
+## References
+
+AG News dataset via Hugging Face `fancyzhx/ag_news`.
+
+PyTorch documentation for recurrent layers, Transformer Encoder layers, and `torch.nn.CrossEntropyLoss`.

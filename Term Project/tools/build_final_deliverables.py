@@ -158,31 +158,51 @@ This project compares a from-scratch LSTM classifier and a from-scratch Transfor
 
     report = f"""# LSTM vs Transformer Encoder for AG News Classification
 
-## 1. Introduction
+## Table of Figures
 
-This project compares two neural text classifiers trained from scratch on the AG News four-class classification task: a bidirectional LSTM classifier and a Transformer Encoder classifier. The goal is not simply to maximize accuracy. The project evaluates how recurrent sequence modeling and self-attention differ in classification performance, training behavior, convergence patterns, data efficiency, and failure cases.
+Figure 1: Training and validation loss curves for the main comparison
 
-Both models use the same dataset source, split procedure, tokenizer, vocabulary, maximum sequence length, optimizer family, training budget, and evaluation metrics. This controlled setup makes the comparison more informative than a raw leaderboard-style accuracy result. The main research question is: under a shared preprocessing and training pipeline, how do the LSTM and Transformer Encoder differ on AG News classification?
+Figure 2: LSTM final test confusion matrix
 
-## 2. Dataset And Preprocessing
+Figure 3: Transformer Encoder final test confusion matrix
 
-The project uses Hugging Face `fancyzhx/ag_news` as the only dataset source. The official training split was divided into 108,000 training examples and 12,000 validation examples using `train_test_split(test_size=0.1, seed=42)`. The official test split contains 7,600 examples and was reserved for final evaluation only.
+Table 1: Trainable parameter counts
 
-The four labels are `World`, `Sports`, `Business`, and `Sci/Tech`. The official test split is balanced, with 1,900 examples per class. The training split is also nearly balanced: 26,991 World, 26,966 Sports, 27,100 Business, and 26,943 Sci/Tech examples. Labels were verified as integer class indices `0, 1, 2, 3`, which matches the requirement for `torch.nn.CrossEntropyLoss`.
+Table 2: Final model configuration and hyperparameters
 
-Texts were tokenized with a reproducible regular-expression tokenizer. The vocabulary was built only from the training split to avoid vocabulary leakage. The vocabulary size was capped at 20,000 tokens, with reserved indices for padding and unknown tokens. The main comparison used a maximum sequence length of 128 tokens. Both models received the same padded and truncated token IDs, and padding masks were used during LSTM pooling and Transformer attention.
+Table 3: Main validation and test results
 
-## 3. Models
+Table 4: Dataset-size ablation results
 
-The LSTM classifier uses an embedding layer, a one-layer bidirectional LSTM, masked mean pooling, dropout, and a final linear classifier. The Transformer Encoder classifier uses an embedding layer, learned positional embeddings, two Transformer Encoder layers, four attention heads, feedforward dimension 512, masked mean pooling, dropout, and a final linear classifier. Both models were trained from scratch, without pretrained embeddings or pretrained language models.
+Table 5: Optional sequence-length ablation results
+
+Table 6: Selected misclassified examples
+
+## Motivation
+
+Text classification is one of the standard ways to evaluate whether a neural network can turn raw language into useful categories. In this report, I compare an LSTM classifier and a Transformer Encoder classifier on the same AG News task. The purpose is not only to see which model gives a slightly higher accuracy, but to evaluate how the two architectures behave when the dataset, preprocessing, training budget, and metrics are controlled.
+
+The comparison is interesting because the two models represent different assumptions about sequence data. The LSTM reads the text recurrently and carries information through a hidden state. The Transformer Encoder uses self-attention, allowing every token to interact with other tokens directly. In theory, the Transformer should have more flexible global context modeling, while the LSTM may be more stable when the amount of data is reduced.
+
+## Background
+
+AG News is a four-class news classification dataset. Each input is a short news text, and the model predicts one of four categories: `World`, `Sports`, `Business`, or `Sci/Tech`. The project uses Hugging Face `fancyzhx/ag_news` as the only dataset source. The official training split was divided into 108,000 training examples and 12,000 validation examples using `train_test_split(test_size=0.1, seed=42)`. The official test split contains 7,600 examples and was reserved for final evaluation only.
+
+The test split is balanced, with 1,900 examples per class. The training split is also nearly balanced: 26,991 World, 26,966 Sports, 27,100 Business, and 26,943 Sci/Tech examples. Labels were verified as integer class indices `0, 1, 2, 3`, which matches the requirement for `torch.nn.CrossEntropyLoss`.
+
+For preprocessing, the text was tokenized with a reproducible regular-expression tokenizer. The vocabulary was built only from the training split to avoid vocabulary leakage. The vocabulary size was capped at 20,000 tokens, with reserved indices for padding and unknown tokens. The main comparison used a maximum sequence length of 128 tokens. Both models received the same padded and truncated token IDs, and padding masks were used during LSTM pooling and Transformer attention.
+
+## Model Development
+
+The first model is a bidirectional LSTM classifier. It uses an embedding layer, a one-layer bidirectional LSTM, masked mean pooling, dropout, and a final linear classifier. The second model is a Transformer Encoder classifier. It uses an embedding layer, learned positional embeddings, two Transformer Encoder layers, four attention heads, feedforward dimension 512, masked mean pooling, dropout, and a final linear classifier. Both models were trained from scratch, without pretrained embeddings or pretrained language models.
 
     {table_md(["Model", "Trainable parameters"], param_rows)}
 
     {table_md(["Setting", "LSTM", "Transformer Encoder"], hyperparam_rows)}
 
-The parameter counts are reasonably comparable for an introductory architecture comparison. The Transformer Encoder has about 5.2% more trainable parameters than the LSTM, so the report treats its small final metric advantage cautiously.
+The parameter counts are reasonably comparable for this assignment. The Transformer Encoder has about 5.2% more trainable parameters than the LSTM, so I treat its small final metric advantage cautiously.
 
-## 4. Experiments
+## Experimental Verification
 
 The main comparison trained both models for 6 epochs using Adam, learning rate `1e-3`, batch size 64, dropout 0.2, seed 42, and CPU execution. The evaluation metrics were accuracy and macro F1-score. Macro F1 was included because AG News has multiple classes and the assignment requires class-sensitive evaluation, even though the dataset is nearly balanced.
 
@@ -190,7 +210,7 @@ The required ablation changed one major factor: the fraction of training data. T
 
 An optional extension compared maximum sequence lengths of 128 and 256 tokens. This tested whether longer context improved validation performance enough to justify the additional training cost.
 
-## 5. Results
+## Results and Interpretation
 
 {table_md(["Model", "Split", "Loss", "Accuracy", "Macro F1"], main_rows)}
 
@@ -208,7 +228,7 @@ Figures used for the final report:
 
 ![Transformer Encoder final test confusion matrix](../outputs/transformer_confusion_matrix.png)
 
-## 6. Ablation Study
+## Ablation Study
 
 Hypothesis: the LSTM will be more stable with limited training data, while the Transformer Encoder will benefit more from the full dataset. The changed variable was training-set fraction. The controlled variables were dataset source, train/validation split, tokenizer, vocabulary, maximum sequence length, optimizer, learning rate, batch size, epoch count, metrics, and validation evaluation.
 
@@ -222,7 +242,7 @@ The optional sequence-length ablation is shown below.
 
 Increasing maximum sequence length from 128 to 256 did not improve validation performance. Both models performed worse at 256 tokens. Under the current training budget and architecture sizes, longer context added cost without improving classification quality.
 
-## 7. Failure Analysis
+## Failure Analysis
 
 The table below gives six representative misclassified test examples. It includes cases missed by both models, cases missed only by the LSTM, and cases missed only by the Transformer Encoder.
 
@@ -230,11 +250,21 @@ The table below gives six representative misclassified test examples. It include
 
 The selected errors show that the two models often fail on semantic boundary cases. Some examples contain surface words strongly associated with a different news section, such as an Olympics item labeled World but predicted as Sports by both models. Other examples involve technology companies or IPOs, where Business and Sci/Tech labels overlap. The models therefore fail similarly when the text has ambiguous section cues, but they also show different single-model errors: the LSTM misread some science/world-style items, while the Transformer misread some short Sci/Tech items as Business.
 
-## 8. Conclusion
+## Conclusion
 
 Both from-scratch models performed well on AG News under the controlled setup, reaching about 91.2% final test accuracy. The Transformer Encoder achieved the best final test metrics, but only by a small margin. The LSTM was stronger in lower-data ablation settings, while the Transformer Encoder benefited more from the full training set.
 
 The required dataset-size ablation supports the original data-efficiency hypothesis. The optional sequence-length ablation showed that simply increasing maximum sequence length from 128 to 256 did not improve validation metrics. The most reasonable next experiment would be to tune early stopping or regularization, because both models show overfitting by the final epoch.
+
+## Appendix
+
+The complete notebook and generated output files are included in the project repository. The AI Usage Appendix is provided as a separate required appendix and also included in the combined report deliverable.
+
+## References
+
+AG News dataset via Hugging Face `fancyzhx/ag_news`.
+
+PyTorch documentation for recurrent layers, Transformer Encoder layers, and `torch.nn.CrossEntropyLoss`.
 """
     report = report.replace("\n    |", "\n|")
 
@@ -263,80 +293,51 @@ AI reduced the time needed to organize requirements, audit deliverables, and dra
 
     slides_md = """# Final Presentation Slide Plan
 
-## Slide 1 - Research Question
+Reference format: 4:3 academic seminar deck, white background, blue title rule, top-left slide numbering, bottom-left course/lab footer, and bottom-right page count.
 
-Claim: We compare recurrent sequence modeling and self-attention under one controlled AG News pipeline.
+## Slide 1 - Title
 
-Speaker note: The goal is not just high accuracy. The project asks whether LSTM and Transformer Encoder models behave differently in performance, convergence, data efficiency, and failure cases.
+LSTM vs Transformer Encoder for AG News Text Classification.
 
-## Slide 2 - Dataset And Split
+## Slide 2 - Table of Contents
 
-Claim: AG News is balanced and controlled enough for a fair four-class comparison.
+Introduction and Motivation; Dataset and Preprocessing; Model Development; Main Comparison Results; Ablation Study; Failure Analysis; Conclusion and Future Work.
 
-- Source: Hugging Face `fancyzhx/ag_news`
-- Train/validation/test: 108,000 / 12,000 / 7,600
-- Labels: World, Sports, Business, Sci/Tech
+## Slide 3 - Introduction
 
-## Slide 3 - Shared Pipeline
+Claim: Both models are common sequence classifiers, but they process text differently.
 
-Claim: The comparison uses the same inputs for both models.
+## Slide 4 - Dataset
 
-- Train-only vocabulary, 20,000 tokens
-- Regex tokenizer
-- Max length 128 for main comparison
-- Padding masks used during pooling and attention
+Claim: AG News provides a controlled four-class classification task.
 
-## Slide 4 - Model Architectures
+## Slide 5 - Preprocessing
 
-Claim: The two models are different architectures but comparable in size.
+Claim: Both models use the same processed input pipeline.
 
-- LSTM: bidirectional, one layer, masked mean pooling, 2.83M parameters
-- Transformer Encoder: two layers, four heads, learned positions, 2.97M parameters
+## Slide 6 - Model Development
 
-## Slide 5 - Main Test Result
+Claim: The two models are different but comparable in size.
 
-Claim: Both models are close, with a slight Transformer Encoder edge.
+## Slide 7 - Main Results
 
-- LSTM test accuracy 0.9120, macro F1 0.9118
-- Transformer test accuracy 0.9125, macro F1 0.9126
+Claim: Both models perform similarly, with a slight Transformer Encoder advantage.
 
-## Slide 6 - Training Behavior
+## Slide 8 - Training Behavior
 
-Claim: Both models overfit by epoch 6.
+Claim: Both models show overfitting by the final epoch.
 
-- Training loss keeps falling
-- Validation loss rises late in training
-- Early stopping or stronger regularization is the next experiment
-
-## Slide 7 - Confusion Matrices
+## Slide 9 - Confusion Matrices
 
 Claim: Business and Sci/Tech are the main source of class-level errors.
 
-- Sports is easiest for both models
-- Business/Sci-Tech overlap is frequent because many company stories have both market and technology cues
+## Slide 10 - Ablation Study
 
-## Slide 8 - Dataset-Size Ablation
+Claim: LSTM is more stable with less data; Transformer benefits from the full dataset.
 
-Claim: LSTM is more stable with less data, while Transformer benefits from the full dataset.
+## Slide 11 - Conclusion
 
-- 25%: LSTM 0.8719 vs Transformer 0.8699 validation accuracy
-- 50%: LSTM 0.8944 vs Transformer 0.8901
-- 100%: Transformer 0.9146 vs LSTM 0.9089
-
-## Slide 9 - Sequence-Length Extension And Failures
-
-Claim: More context did not help in this run, and errors are mostly boundary cases.
-
-- 256 tokens reduced validation metrics for both models
-- Failure examples show Olympics/World ambiguity and Business/Sci-Tech overlap
-
-## Slide 10 - Conclusion
-
-Claim: Architecture differences appear most clearly in data efficiency and failure patterns, not in a large final accuracy gap.
-
-- Transformer Encoder slightly wins the final test comparison
-- LSTM performs better with limited data
-- Future work: early stopping, regularization, and class-level error reduction
+Claim: Architecture differences appear most clearly in data efficiency and failure patterns.
 """
 
     return {
@@ -467,7 +468,7 @@ def write_docx_files(markdown: dict[str, str]) -> None:
         lines = section_text.splitlines()
         doc.add_heading(lines[0], level=1)
         body = "\n".join(lines[1:]).strip()
-        if lines[0].startswith("3. Models"):
+        if lines[0].startswith("Model Development"):
             add_para(doc, "The LSTM uses an embedding layer, one-layer bidirectional LSTM, masked mean pooling, dropout, and a linear classifier. The Transformer Encoder uses embeddings, learned positional embeddings, two encoder layers, four heads, masked mean pooling, dropout, and a classifier.")
             add_table(doc, ["Model", "Trainable parameters"], [[r["model"], f'{int(r["trainable_parameters"]):,}'] for r in params], [3.0, 2.0])
             add_table(
@@ -487,20 +488,20 @@ def write_docx_files(markdown: dict[str, str]) -> None:
                 [1.7, 2.2, 2.3],
             )
             add_para(doc, "Both models were trained from scratch with no pretrained embeddings or pretrained language models.")
-        elif lines[0].startswith("5. Results"):
+        elif lines[0].startswith("Results and Interpretation"):
             add_table(doc, ["Model", "Split", "Loss", "Accuracy", "Macro F1"], [[r["model"], r["split"], fmt(r["loss"]), fmt(r["accuracy"]), fmt(r["macro_f1"])] for r in main], [2.2, 0.8, 0.8, 0.9, 0.9])
             add_para(doc, "Both models reached similar final performance. The Transformer Encoder was slightly better on final test metrics, but the gap was small.")
             add_image(doc, OUT / "main_loss_curves.png", "Figure 1. Training and validation loss curves.")
             add_image(doc, OUT / "lstm_confusion_matrix.png", "Figure 2. LSTM final test confusion matrix.", 5.3)
             add_image(doc, OUT / "transformer_confusion_matrix.png", "Figure 3. Transformer Encoder final test confusion matrix.", 5.3)
             add_para(doc, "Both models overfit by epoch 6. Sports was easiest for both models, and Business/Sci/Tech confusion was the main class-level error pattern.")
-        elif lines[0].startswith("6. Ablation"):
+        elif lines[0].startswith("Ablation Study"):
             add_para(doc, "Hypothesis: LSTM is more stable with limited data, while Transformer Encoder benefits more from full data. The changed variable was training-set fraction; all other major settings were controlled.")
             add_table(doc, ["Model", "Train fraction", "Accuracy", "Macro F1"], [[r["model"], f'{float(r["train_fraction"]):.0%}', fmt(r["valid_accuracy"]), fmt(r["valid_macro_f1"])] for r in dataset_ablation], [2.4, 1.0, 1.0, 1.0])
             add_para(doc, "The ablation supports the hypothesis: LSTM led at 25% and 50%, while Transformer Encoder led at 100%.")
             add_table(doc, ["Model", "Max length", "Loss", "Accuracy", "Macro F1"], [[r["model"], r["max_sequence_length"], fmt(r["valid_loss"]), fmt(r["valid_accuracy"]), fmt(r["valid_macro_f1"])] for r in seq_ablation], [2.2, 0.9, 0.8, 0.9, 0.9])
             add_para(doc, "The optional sequence-length extension showed that 256-token inputs reduced validation performance for both models.")
-        elif lines[0].startswith("7. Failure"):
+        elif lines[0].startswith("Failure Analysis"):
             add_para(doc, "The selected examples cover both-wrong, LSTM-only wrong, and Transformer-only wrong cases.")
             rows = []
             for i, r in enumerate(failures):
@@ -543,22 +544,28 @@ def write_docx_files(markdown: dict[str, str]) -> None:
     doc.save(DELIVERABLES / "ag_news_ai_usage_appendix.docx")
 
 
-def add_ppt_title(slide, kicker: str, title: str) -> None:
-    tx = slide.shapes.add_textbox(PptInches(0.55), PptInches(0.35), PptInches(11.8), PptInches(0.35))
-    p = tx.text_frame.paragraphs[0]
-    p.text = kicker.upper()
-    p.font.size = PptPt(10)
-    p.font.bold = True
-    p.font.color.rgb = PptRGBColor(54, 96, 146)
-    box = slide.shapes.add_textbox(PptInches(0.55), PptInches(0.72), PptInches(11.8), PptInches(0.8))
+def add_ppt_title(slide, kicker: str, title: str, slide_num: int | None = None) -> None:
+    if slide_num is not None:
+        num = slide.shapes.add_textbox(PptInches(0.08), PptInches(0.12), PptInches(0.25), PptInches(0.22))
+        p = num.text_frame.paragraphs[0]
+        p.text = str(slide_num)
+        p.font.size = PptPt(13)
+        p.font.bold = True
+        p.font.color.rgb = PptRGBColor(31, 78, 121)
+    box = slide.shapes.add_textbox(PptInches(0.28), PptInches(0.16), PptInches(9.25), PptInches(0.42))
+    box.text_frame.word_wrap = True
     p = box.text_frame.paragraphs[0]
     p.text = title
-    p.font.size = PptPt(28)
+    p.font.size = PptPt(15 if len(title) > 76 else 17)
     p.font.bold = True
     p.font.color.rgb = PptRGBColor(11, 37, 69)
+    line = slide.shapes.add_shape(1, PptInches(0.28), PptInches(0.58), PptInches(9.25), PptInches(0.02))
+    line.fill.solid()
+    line.fill.fore_color.rgb = PptRGBColor(31, 78, 121)
+    line.line.color.rgb = PptRGBColor(31, 78, 121)
 
 
-def add_ppt_bullets(slide, items: list[str], x=0.75, y=1.65, w=5.7, h=4.7, size=17) -> None:
+def add_ppt_bullets(slide, items: list[str], x=0.6, y=1.05, w=8.7, h=5.5, size=12) -> None:
     box = slide.shapes.add_textbox(PptInches(x), PptInches(y), PptInches(w), PptInches(h))
     tf = box.text_frame
     tf.word_wrap = True
@@ -568,7 +575,7 @@ def add_ppt_bullets(slide, items: list[str], x=0.75, y=1.65, w=5.7, h=4.7, size=
         p.level = 0
         p.font.size = PptPt(size)
         p.font.color.rgb = PptRGBColor(35, 35, 35)
-        p.space_after = PptPt(8)
+        p.space_after = PptPt(5)
 
 
 def add_metric(slide, x: float, y: float, value: str, label: str, color=(46, 116, 181)) -> None:
@@ -591,60 +598,86 @@ def add_metric(slide, x: float, y: float, value: str, label: str, color=(46, 116
     p2.alignment = PP_ALIGN.CENTER
 
 
-def add_footer(slide, num: int) -> None:
-    box = slide.shapes.add_textbox(PptInches(11.9), PptInches(6.95), PptInches(0.7), PptInches(0.2))
+def add_footer(slide, num: int, total: int = 11) -> None:
+    left = slide.shapes.add_textbox(PptInches(0.12), PptInches(7.18), PptInches(3.5), PptInches(0.16))
+    p0 = left.text_frame.paragraphs[0]
+    p0.text = "Advanced Battery Manufacturing Systems"
+    p0.font.size = PptPt(5.5)
+    p0.font.color.rgb = PptRGBColor(31, 78, 121)
+    box = slide.shapes.add_textbox(PptInches(9.2), PptInches(7.18), PptInches(0.55), PptInches(0.16))
     p = box.text_frame.paragraphs[0]
-    p.text = str(num)
-    p.font.size = PptPt(8)
+    p.text = f"{num} of {total}"
+    p.font.size = PptPt(5.5)
     p.font.color.rgb = PptRGBColor(120, 120, 120)
     p.alignment = PP_ALIGN.RIGHT
 
 
 def write_pptx() -> None:
     prs = Presentation()
-    prs.slide_width = PptInches(13.333)
+    prs.slide_width = PptInches(10)
     prs.slide_height = PptInches(7.5)
     blank = prs.slide_layouts[6]
     slides = [
-        ("Research Question", "One controlled AG News pipeline compares recurrent modeling and self-attention.", ["Compare LSTM and Transformer Encoder classifiers trained from scratch.", "Analyze accuracy, macro F1, convergence, ablation behavior, and failure cases.", "No pretrained language models or pretrained embeddings."]),
-        ("Dataset", "AG News provides a balanced four-class classification task.", ["Source: Hugging Face fancyzhx/ag_news.", "Split: 108,000 train, 12,000 validation, 7,600 official test.", "Labels: World, Sports, Business, Sci/Tech."]),
-        ("Shared Pipeline", "Both models receive the same processed inputs.", ["Regex tokenizer and train-only vocabulary.", "Vocabulary size: 20,000 tokens.", "Maximum sequence length: 128 for the main comparison.", "Padding masks used during pooling and attention."]),
-        ("Architectures", "Different sequence models, comparable parameter scale.", ["LSTM: bidirectional one-layer recurrent encoder with masked mean pooling.", "Transformer Encoder: two layers, four heads, learned positional embeddings.", "Parameter counts are close enough for a fair introductory comparison."]),
-        ("Main Result", "Both models are close; Transformer Encoder has a slight final edge.", ["LSTM test accuracy 0.9120 and macro F1 0.9118.", "Transformer test accuracy 0.9125 and macro F1 0.9126.", "The margin is small, so the conclusion should be cautious."]),
-        ("Training Behavior", "Both models show overfitting by epoch 6.", ["Training loss continues falling.", "Validation loss rises late in training.", "Early stopping or stronger regularization is the most direct next experiment."]),
-        ("Class-Level Errors", "Business and Sci/Tech are the main confusion pair.", ["Sports is easiest for both models.", "Business/Sci-Tech stories often mix company, market, and technology cues.", "Confusion matrices support the failure-analysis examples."]),
-        ("Dataset-Size Ablation", "LSTM is stronger with less data; Transformer benefits from full data.", ["25% data: LSTM 0.8719 vs Transformer 0.8699 validation accuracy.", "50% data: LSTM 0.8944 vs Transformer 0.8901.", "100% data: Transformer 0.9146 vs LSTM 0.9089."]),
-        ("Sequence Length And Failures", "Longer context did not help, and errors are semantic boundary cases.", ["256 tokens reduced validation metrics for both models.", "Selected errors include Olympics/World ambiguity and Business/Sci-Tech overlap.", "The models fail similarly on ambiguous section cues but differ on some single-model errors."]),
-        ("Conclusion", "Architecture differences appear most clearly in data efficiency and failure patterns.", ["Transformer Encoder slightly wins the final test comparison.", "LSTM performs better in limited-data settings.", "Future work: early stopping, regularization, and class-level error reduction."]),
+        ("Title", "LSTM vs Transformer Encoder for AG News Text Classification", []),
+        ("Table of Contents", "Table of Contents", ["Introduction and Motivation", "Dataset and Preprocessing", "Model Development", "Main Comparison Results", "Ablation Study", "Failure Analysis", "Conclusion and Future Work"]),
+        ("Introduction", "Why compare LSTM and Transformer Encoder models?", ["Both models are common sequence classifiers, but they process text differently.", "The LSTM carries information recurrently through hidden states.", "The Transformer Encoder uses self-attention to connect tokens directly.", "The goal is to compare behavior, not only final accuracy."]),
+        ("Dataset", "AG News provides a controlled four-class text classification task.", ["Dataset source: Hugging Face fancyzhx/ag_news only.", "Classes: World, Sports, Business, and Sci/Tech.", "Split: 108,000 train, 12,000 validation, and 7,600 official test examples.", "The official test set is used only for final evaluation."]),
+        ("Preprocessing", "Both models use the same processed input pipeline.", ["Regex tokenizer and train-only vocabulary construction.", "Vocabulary size capped at 20,000 tokens.", "Maximum sequence length is 128 for the main comparison.", "Padding masks are used during LSTM pooling and Transformer attention."]),
+        ("Model Development", "The two models are different but comparable in size.", ["LSTM: embedding layer, one-layer bidirectional LSTM, masked mean pooling, dropout, classifier.", "Transformer Encoder: embeddings, learned positional encoding, two encoder layers, four heads, classifier.", "Trainable parameters: LSTM 2.83M; Transformer Encoder 2.97M.", "Both models are trained from scratch."]),
+        ("Main Results", "Both models perform similarly, with a slight Transformer Encoder advantage.", ["LSTM test accuracy: 0.9120; macro F1: 0.9118.", "Transformer Encoder test accuracy: 0.9125; macro F1: 0.9126.", "The difference is small, so the conclusion should be cautious."]),
+        ("Training Behavior", "Both models show overfitting by the final epoch.", ["Training loss continues to decrease across 6 epochs.", "Validation loss rises late in training.", "This suggests early stopping or stronger regularization as the next experiment."]),
+        ("Confusion Matrices", "Business and Sci/Tech are the main source of class-level errors.", ["Sports is the easiest class for both models.", "Business and Sci/Tech overlap because many company stories include technology terms.", "The pattern is consistent with the selected failure examples."]),
+        ("Ablation Study", "LSTM is more stable with less data; Transformer benefits from the full dataset.", ["25% data: LSTM 0.8719 vs Transformer 0.8699 validation accuracy.", "50% data: LSTM 0.8944 vs Transformer 0.8901.", "100% data: Transformer 0.9146 vs LSTM 0.9089.", "The result supports the data-efficiency hypothesis."]),
+        ("Conclusion", "Architecture differences appear most clearly in data efficiency and failure patterns.", ["Transformer Encoder slightly wins the final test comparison.", "LSTM performs better in limited-data settings.", "Longer 256-token inputs did not improve validation metrics.", "Future work: early stopping, regularization, and class-level error reduction."]),
     ]
     image_map = {
-        5: OUT / "main_loss_curves.png",
-        6: OUT / "lstm_confusion_matrix.png",
-        7: OUT / "transformer_confusion_matrix.png",
+        7: OUT / "main_loss_curves.png",
+        8: OUT / "main_loss_curves.png",
+        9: OUT / "transformer_confusion_matrix.png",
     }
     for idx, (kicker, title, bullets) in enumerate(slides, start=1):
         slide = prs.slides.add_slide(blank)
         bg = slide.background.fill
         bg.solid()
-        bg.fore_color.rgb = PptRGBColor(250, 250, 248)
-        add_ppt_title(slide, kicker, title)
+        bg.fore_color.rgb = PptRGBColor(255, 255, 255)
         if idx == 1:
-            add_metric(slide, 0.75, 2.05, "91.25%", "best test accuracy")
-            add_metric(slide, 3.45, 2.05, "6", "training epochs", (89, 89, 89))
-            add_metric(slide, 6.15, 2.05, "3", "ablation sizes", (31, 77, 120))
-            add_ppt_bullets(slide, bullets, x=0.85, y=3.65, w=11.0, h=2.0, size=18)
-        elif idx == 4:
-            add_metric(slide, 0.75, 2.0, "2.83M", "LSTM parameters")
-            add_metric(slide, 3.45, 2.0, "2.97M", "Transformer parameters")
-            add_ppt_bullets(slide, bullets, x=0.85, y=3.55, w=11.0, h=2.0, size=18)
+            title_box = slide.shapes.add_textbox(PptInches(0.8), PptInches(1.45), PptInches(8.4), PptInches(1.2))
+            p = title_box.text_frame.paragraphs[0]
+            p.text = title
+            p.font.size = PptPt(24)
+            p.font.bold = True
+            p.font.color.rgb = PptRGBColor(0, 77, 153)
+            p.alignment = PP_ALIGN.CENTER
+            info = slide.shapes.add_textbox(PptInches(1.2), PptInches(3.25), PptInches(7.6), PptInches(1.4))
+            tf = info.text_frame
+            for i, text in enumerate(["Course: Introduction to Deep Learning", "AG News Classification Term Project", "Muhammad Abdullah Hassan Malik"]):
+                p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
+                p.text = text
+                p.font.size = PptPt(12 if i < 2 else 11)
+                p.font.bold = i == 2
+                p.alignment = PP_ALIGN.CENTER
+            add_footer(slide, idx, len(slides))
+        elif idx == 2:
+            add_ppt_title(slide, kicker, title, idx)
+            add_ppt_bullets(slide, bullets, x=0.75, y=1.05, w=8.3, h=4.8, size=13)
+            add_footer(slide, idx, len(slides))
+        elif idx == 6:
+            add_ppt_title(slide, kicker, title, idx)
+            add_metric(slide, 0.75, 1.35, "2.83M", "LSTM parameters")
+            add_metric(slide, 3.45, 1.35, "2.97M", "Transformer parameters")
+            add_ppt_bullets(slide, bullets, x=0.75, y=3.0, w=8.5, h=3.5, size=11.5)
+            add_footer(slide, idx, len(slides))
         elif idx in image_map:
             img = image_map[idx]
             if img.exists():
-                slide.shapes.add_picture(str(img), PptInches(6.8), PptInches(1.65), width=PptInches(5.45))
-            add_ppt_bullets(slide, bullets, x=0.75, y=1.75, w=5.6, h=4.7, size=17)
+                slide.shapes.add_picture(str(img), PptInches(5.35), PptInches(1.0), width=PptInches(4.15))
+            add_ppt_title(slide, kicker, title, idx)
+            add_ppt_bullets(slide, bullets, x=0.55, y=1.05, w=4.55, h=5.6, size=11)
+            add_footer(slide, idx, len(slides))
         else:
-            add_ppt_bullets(slide, bullets, x=0.9, y=1.85, w=11.2, h=4.8, size=20)
-        add_footer(slide, idx)
+            add_ppt_title(slide, kicker, title, idx)
+            add_ppt_bullets(slide, bullets, x=0.75, y=1.05, w=8.5, h=5.7, size=12)
+            add_footer(slide, idx, len(slides))
     prs.save(DELIVERABLES / "ag_news_lstm_transformer_presentation.pptx")
 
 
