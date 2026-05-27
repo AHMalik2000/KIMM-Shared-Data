@@ -35,4 +35,34 @@
 - The final report DOCX contains 6 tables and 3 embedded figures.
 - The presentation PPTX contains 11 slides and 3 embedded result figures.
 - Microsoft PowerPoint rendered the updated presentation to PNG successfully for visual QA.
-- Full visual rendering of the DOCX files could not be completed because Word COM opened the document but hung during PDF export, and LibreOffice/`soffice` is not installed in the current environment.
+- Microsoft Word COM verification on 2026-05-27 reported the final report as 6 pages, the AI Usage Appendix as 1 page, and the combined report plus appendix as 7 pages.
+- Microsoft PowerPoint COM verification on 2026-05-27 reported 11 slides at 4:3 size and exported all 11 slides to PNG at 1280x960.
+- Exported slide PNGs were checked for nonblank rendered content.
+
+## Sections 16-18 Final Audit
+
+| PDF section | Requirement or grading area | Final status |
+|---|---|---|
+| 16 Deliverables | Initial project plan: one page describing split, preprocessing, model configuration, ablation plan, and expected analysis | Satisfied by `docs/initial_project_plan.md` and `deliverables/ag_news_one_page_summary.docx`. |
+| 16 Deliverables | Source code as a clean, runnable, reproducible Jupyter notebook | Satisfied by `notebooks/ag_news_lstm_transformer.ipynb`; notebook JSON parsed successfully and contains the controlled AG News pipeline, model definitions, training loop, evaluation, and artifact generation. |
+| 16 Deliverables | Final report: 4-6 pages excluding AI Usage Appendix | Satisfied by `deliverables/ag_news_final_report.docx`; Word reported 6 pages. |
+| 16 Deliverables | AI Usage Appendix: maximum 1 page | Satisfied by `deliverables/ag_news_ai_usage_appendix.docx`; Word reported 1 page. |
+| 16 Deliverables | Final presentation: 8-10 minute presentation plus Q&A | Satisfied by `deliverables/ag_news_lstm_transformer_presentation.pptx` and `docs/final_presentation_script.md`; deck has 11 concise slides and a presenter script for the expected talk flow. |
+| 17 Minimum Requirements | Train one LSTM classifier | Satisfied by notebook and reported results. |
+| 17 Minimum Requirements | Train one Transformer Encoder classifier | Satisfied by notebook and reported results. |
+| 17 Minimum Requirements | Conduct one ablation study | Satisfied by dataset-size ablation at 25%, 50%, and 100% in `outputs/dataset_size_ablation.csv`. |
+| 17 Minimum Requirements | Report accuracy and macro F1-score | Satisfied by `outputs/main_results.csv` and report tables. |
+| 17 Minimum Requirements | Provide training and validation loss curves | Satisfied by `outputs/main_loss_curves.png` and embedded report figure. |
+| 17 Minimum Requirements | Provide a confusion matrix | Satisfied by LSTM and Transformer confusion matrices in `outputs/` and embedded report figures. |
+| 17 Minimum Requirements | Analyze at least five misclassified examples | Satisfied by 6 examples in `outputs/selected_misclassifications.csv` and the report failure-analysis table. |
+| 17 Minimum Requirements | Submit an AI Usage Appendix | Satisfied by Markdown and DOCX appendix artifacts. |
+| 17 Minimum Requirements | Submit final report, code, and presentation | Satisfied by DOCX report, Jupyter notebook, and PPTX deck. |
+| 17 Optional Extensions | Optional extension coverage | Included sequence-length ablation at 128 vs 256 in `outputs/sequence_length_ablation.csv`. |
+| 18 Grading Rubric | Problem definition and dataset understanding | Covered in report Motivation/Background and dataset documentation. |
+| 18 Grading Rubric | Correct implementation and reproducibility | Covered by notebook, fixed seed, one dataset source, train-only vocabulary, reported hyperparameters, and output artifacts. |
+| 18 Grading Rubric | Fair model comparison | Covered by shared split, preprocessing, vocabulary, max length, metrics, and comparable training budget. |
+| 18 Grading Rubric | Ablation study | Covered by clear dataset-size hypothesis, controlled variables, result table, and interpretation. |
+| 18 Grading Rubric | Result interpretation | Covered by metric, loss-curve, confusion-matrix, and model-behavior discussion. |
+| 18 Grading Rubric | Failure analysis | Covered by concrete misclassified examples, confidence scores, and likely error reasons. |
+| 18 Grading Rubric | AI usage transparency and verification | Covered by the AI Usage Appendix. |
+| 18 Grading Rubric | Presentation quality | Covered by a concise 4:3 academic seminar deck, rendered with PowerPoint for visual QA. |
