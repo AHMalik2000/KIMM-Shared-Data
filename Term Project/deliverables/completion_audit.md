@@ -19,7 +19,7 @@
 | One-page plan/summary | `docs/one_page_project_summary.md`; `deliverables/ag_news_one_page_summary.docx` |
 | Final report | `docs/final_report.md`; `deliverables/ag_news_final_report.docx` |
 | Final presentation | `docs/final_presentation_script.md`; `deliverables/ag_news_lstm_transformer_presentation.pptx` |
-| Reference report/deck format and tone | Report follows the assignment-required structure: Table of Figures, Introduction, Dataset, Models, Experiments, Results, Ablation Study, Failure Analysis, Conclusion, AI Usage Appendix, and References. Presentation follows the reference deck pattern and the script now includes anticipated Q&A talking points. |
+| Reference report/deck format and tone | Report follows the assignment-required structure: List of Tables and Figures, Introduction, Dataset, Models, Experiments, Results, Ablation Study, Failure Analysis, Conclusion, AI Usage Appendix, and References. Presentation follows the reference deck pattern and the script now includes anticipated Q&A talking points. |
 
 ## Generated Deliverables
 
@@ -35,7 +35,7 @@
 - The final report source contains 8 tables and 3 referenced/embedded figures.
 - The presentation PPTX contains 11 slides and 3 embedded result figures.
 - Earlier Microsoft PowerPoint QA rendered the presentation to PNG successfully for visual QA.
-- Earlier Microsoft Word COM verification on 2026-05-27 reported the prior final report as 6 pages, the AI Usage Appendix as 1 page, and the combined report plus appendix as 7 pages; the updated report keeps the same submission scope while adding rubric-alignment content.
+- Microsoft Word COM page-count verification on 2026-06-01 reported the updated final report as 4 pages, the AI Usage Appendix as 1 page, and the combined report plus appendix as 5 pages.
 - Microsoft PowerPoint COM verification on 2026-05-27 reported 11 slides at 4:3 size and exported all 11 slides to PNG at 1280x960.
 - Exported slide PNGs were checked for nonblank rendered content.
 
@@ -45,8 +45,8 @@
 |---|---|---|
 | 16 Deliverables | Initial project plan: one page describing split, preprocessing, model configuration, ablation plan, and expected analysis | Satisfied by `docs/initial_project_plan.md` and `deliverables/ag_news_one_page_summary.docx`. |
 | 16 Deliverables | Source code as a clean, runnable, reproducible Jupyter notebook | Satisfied by `notebooks/ag_news_lstm_transformer.ipynb`; notebook JSON parsed successfully and contains the controlled AG News pipeline, model definitions, training loop, evaluation, and artifact generation. |
-| 16 Deliverables | Final report: 4-6 pages excluding AI Usage Appendix | Satisfied by `deliverables/ag_news_final_report.docx`; prior Word verification reported 6 pages before the rubric-alignment edits. |
-| 16 Deliverables | AI Usage Appendix: maximum 1 page | Satisfied by `deliverables/ag_news_ai_usage_appendix.docx`; prior Word verification reported 1 page before the specificity edits. |
+| 16 Deliverables | Final report: 4-6 pages excluding AI Usage Appendix | Satisfied by `deliverables/ag_news_final_report.docx`; current Word verification reports 4 pages. |
+| 16 Deliverables | AI Usage Appendix: maximum 1 page | Satisfied by `deliverables/ag_news_ai_usage_appendix.docx`; current Word verification reports 1 page. |
 | 16 Deliverables | Final presentation: 8-10 minute presentation plus Q&A | Satisfied by `deliverables/ag_news_lstm_transformer_presentation.pptx` and `docs/final_presentation_script.md`; deck has 11 concise slides and the presenter script includes anticipated Q&A talking points. |
 | 17 Minimum Requirements | Train one LSTM classifier | Satisfied by notebook and reported results. |
 | 17 Minimum Requirements | Train one Transformer Encoder classifier | Satisfied by notebook and reported results. |

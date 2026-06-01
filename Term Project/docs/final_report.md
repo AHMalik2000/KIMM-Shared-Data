@@ -1,6 +1,6 @@
 # LSTM vs Transformer Encoder for AG News Classification
 
-## Table of Figures
+## List of Tables and Figures
 
 Figure 1: Training and validation loss curves for the main comparison
 
@@ -94,7 +94,7 @@ The epoch-1 validation results show a convergence-speed difference: the LSTM rea
 
 The loss curves show that both models continued to reduce training loss while validation loss stopped improving and then increased by the final epoch. This indicates overfitting by epoch 6. The LSTM had a sharper training-validation loss gap by the final epoch, while the Transformer Encoder retained slightly lower validation and test loss. A reasonable next experiment would tune early stopping or regularization using the validation set.
 
-The confusion matrices show that Sports was the easiest class for both models. The largest recurring confusion was between Business and Sci/Tech. For the LSTM, 177 Business items were predicted as Sci/Tech and 121 Sci/Tech items were predicted as Business. For the Transformer Encoder, 200 Business items were predicted as Sci/Tech and 93 Sci/Tech items were predicted as Business. This directional asymmetry suggests that the Transformer Encoder more aggressively predicts Sci/Tech for business stories with technology-company surface terms, while the LSTM more often maps Sci/Tech stories back toward Business.
+The confusion matrices show that Sports was the easiest class for both models. The largest recurring confusion was between Business and Sci/Tech. For the LSTM, 177 Business items were predicted as Sci/Tech and 121 Sci/Tech items were predicted as Business. For the Transformer Encoder, 200 Business items were predicted as Sci/Tech and 93 Sci/Tech items were predicted as Business. Together, these Business/Sci-Tech cross-confusions account for 298 of the LSTM's 669 test errors, or 44.5%, and 293 of the Transformer's 665 test errors, or 44.1%. This directional asymmetry suggests that the Transformer Encoder more aggressively predicts Sci/Tech for business stories with technology-company surface terms, while the LSTM more often maps Sci/Tech stories back toward Business.
 
 Figures used for the final report:
 
@@ -116,6 +116,8 @@ Hypothesis: the LSTM will be more stable with limited training data, while the T
 | Transformer Encoder | 50% | 0.8901 | 0.8895 | +2.02 pp |
 | LSTM | 100% | 0.9089 | 0.9082 | +3.70 pp |
 | Transformer Encoder | 100% | 0.9146 | 0.9142 | +4.47 pp |
+
+Note: The 100% ablation rows use a shuffled training-index order and therefore are not numerically identical to the main-comparison rows in Table 5, even though they use the same examples, seed, and hyperparameters.
 
 The ablation supports the hypothesis. At 25% training data, the LSTM slightly outperformed the Transformer Encoder. At 50%, the LSTM again had higher validation accuracy and macro F1. At 100%, the Transformer Encoder moved ahead. Quantitatively, the LSTM gained about +3.70 percentage points from 25% to 100% training data, while the Transformer Encoder gained about +4.47 percentage points. This provides numerical evidence that the Transformer Encoder benefited more from access to the full training split, while the LSTM was more data-efficient in lower-data settings.
 

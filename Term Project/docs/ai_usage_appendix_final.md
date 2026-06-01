@@ -10,7 +10,7 @@ AI was used to translate the assignment requirements into a controlled experimen
 
 ## Incorrect, Incomplete, Or Misleading AI Outputs
 
-Some early scaffold text still described outputs as pending after the notebook had already been run. That wording was corrected in the project README, report notes, and presentation notes. Some notebook markdown cells also contained interpretation placeholders after outputs were generated; those were replaced with result-aware interpretations. During code review, the team also checked that AI-assisted examples did not apply `softmax` before `CrossEntropyLoss`, did not normalize confusion matrices when raw error counts were needed, and did not use the official test split during model selection or ablation. The team also had to ensure that no claim treated the small Transformer Encoder metric lead as a large or decisive result.
+Some early scaffold text still described outputs as pending after the notebook had already been run. That wording was corrected in the project README, report notes, and presentation notes. Some notebook markdown cells also contained interpretation placeholders after outputs were generated; those were replaced with result-aware interpretations. During code review, no instances were found of three common AI-assisted code errors: applying `softmax` before `CrossEntropyLoss`, normalizing confusion matrices when raw error counts were needed, or using the official test split during model selection or ablation. The team also corrected interpretation wording so that no claim treated the small Transformer Encoder metric lead as a large or decisive result.
 
 ## Team Modifications And Decisions
 

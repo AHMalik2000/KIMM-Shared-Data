@@ -187,7 +187,7 @@ This project compares a from-scratch LSTM classifier and a from-scratch Transfor
 
     report = f"""# LSTM vs Transformer Encoder for AG News Classification
 
-## Table of Figures
+## List of Tables and Figures
 
 Figure 1: Training and validation loss curves for the main comparison
 
@@ -263,7 +263,7 @@ The epoch-1 validation results show a convergence-speed difference: the LSTM rea
 
 The loss curves show that both models continued to reduce training loss while validation loss stopped improving and then increased by the final epoch. This indicates overfitting by epoch 6. The LSTM had a sharper training-validation loss gap by the final epoch, while the Transformer Encoder retained slightly lower validation and test loss. A reasonable next experiment would tune early stopping or regularization using the validation set.
 
-The confusion matrices show that Sports was the easiest class for both models. The largest recurring confusion was between Business and Sci/Tech. For the LSTM, 177 Business items were predicted as Sci/Tech and 121 Sci/Tech items were predicted as Business. For the Transformer Encoder, 200 Business items were predicted as Sci/Tech and 93 Sci/Tech items were predicted as Business. This directional asymmetry suggests that the Transformer Encoder more aggressively predicts Sci/Tech for business stories with technology-company surface terms, while the LSTM more often maps Sci/Tech stories back toward Business.
+The confusion matrices show that Sports was the easiest class for both models. The largest recurring confusion was between Business and Sci/Tech. For the LSTM, 177 Business items were predicted as Sci/Tech and 121 Sci/Tech items were predicted as Business. For the Transformer Encoder, 200 Business items were predicted as Sci/Tech and 93 Sci/Tech items were predicted as Business. Together, these Business/Sci-Tech cross-confusions account for 298 of the LSTM's 669 test errors, or 44.5%, and 293 of the Transformer's 665 test errors, or 44.1%. This directional asymmetry suggests that the Transformer Encoder more aggressively predicts Sci/Tech for business stories with technology-company surface terms, while the LSTM more often maps Sci/Tech stories back toward Business.
 
 Figures used for the final report:
 
@@ -278,6 +278,8 @@ Figures used for the final report:
 Hypothesis: the LSTM will be more stable with limited training data, while the Transformer Encoder will benefit more from the full dataset. The changed variable was training-set fraction. The controlled variables were dataset source, train/validation split, tokenizer, vocabulary, maximum sequence length, optimizer, learning rate, batch size, epoch count, metrics, and validation evaluation.
 
 {table_md(["Model", "Training fraction", "Validation accuracy", "Validation macro F1", "Accuracy gain vs 25%"], ablation_rows)}
+
+Note: The 100% ablation rows use a shuffled training-index order and therefore are not numerically identical to the main-comparison rows in Table 5, even though they use the same examples, seed, and hyperparameters.
 
 The ablation supports the hypothesis. At 25% training data, the LSTM slightly outperformed the Transformer Encoder. At 50%, the LSTM again had higher validation accuracy and macro F1. At 100%, the Transformer Encoder moved ahead. Quantitatively, the LSTM gained about +3.70 percentage points from 25% to 100% training data, while the Transformer Encoder gained about +4.47 percentage points. This provides numerical evidence that the Transformer Encoder benefited more from access to the full training split, while the LSTM was more data-efficient in lower-data settings.
 
@@ -325,7 +327,7 @@ AI was used to translate the assignment requirements into a controlled experimen
 
 ## Incorrect, Incomplete, Or Misleading AI Outputs
 
-Some early scaffold text still described outputs as pending after the notebook had already been run. That wording was corrected in the project README, report notes, and presentation notes. Some notebook markdown cells also contained interpretation placeholders after outputs were generated; those were replaced with result-aware interpretations. During code review, the team also checked that AI-assisted examples did not apply `softmax` before `CrossEntropyLoss`, did not normalize confusion matrices when raw error counts were needed, and did not use the official test split during model selection or ablation. The team also had to ensure that no claim treated the small Transformer Encoder metric lead as a large or decisive result.
+Some early scaffold text still described outputs as pending after the notebook had already been run. That wording was corrected in the project README, report notes, and presentation notes. Some notebook markdown cells also contained interpretation placeholders after outputs were generated; those were replaced with result-aware interpretations. During code review, no instances were found of three common AI-assisted code errors: applying `softmax` before `CrossEntropyLoss`, normalizing confusion matrices when raw error counts were needed, or using the official test split during model selection or ablation. The team also corrected interpretation wording so that no claim treated the small Transformer Encoder metric lead as a large or decisive result.
 
 ## Team Modifications And Decisions
 
@@ -557,7 +559,8 @@ def write_docx_files(markdown: dict[str, str]) -> None:
         elif lines[0].startswith("Ablation Study"):
             add_para(doc, "Hypothesis: LSTM is more stable with limited data, while Transformer Encoder benefits more from full data. The changed variable was training-set fraction; all other major settings were controlled.")
             add_table(doc, ["Model", "Train fraction", "Accuracy", "Macro F1"], [[r["model"], f'{float(r["train_fraction"]):.0%}', fmt(r["valid_accuracy"]), fmt(r["valid_macro_f1"])] for r in dataset_ablation], [2.4, 1.0, 1.0, 1.0])
-            add_para(doc, "The ablation supports the hypothesis: LSTM led at 25% and 50%, while Transformer Encoder led at 100%.")
+            add_para(doc, "Note: The 100% ablation rows use a shuffled training-index order and therefore are not numerically identical to the main-comparison rows, even though they use the same examples, seed, and hyperparameters.")
+            add_para(doc, "The ablation supports the hypothesis: LSTM led at 25% and 50%, while Transformer Encoder led at 100%. The LSTM gained +3.70 percentage points from 25% to 100%, while the Transformer Encoder gained +4.47 percentage points.")
             add_table(doc, ["Model", "Max length", "Loss", "Accuracy", "Macro F1"], [[r["model"], r["max_sequence_length"], fmt(r["valid_loss"]), fmt(r["valid_accuracy"]), fmt(r["valid_macro_f1"])] for r in seq_ablation], [2.2, 0.9, 0.8, 0.9, 0.9])
             add_para(doc, "The optional sequence-length extension showed that 256-token inputs reduced validation performance for both models.")
         elif lines[0].startswith("Failure Analysis"):
@@ -575,7 +578,7 @@ def write_docx_files(markdown: dict[str, str]) -> None:
                     failure_reason(r),
                 ])
             add_table(doc, ["#", "Input excerpt", "True", "LSTM", "Transformer", "LSTM c.", "Trans. c.", "Likely reason"], rows, [0.25, 1.45, 0.6, 0.7, 0.75, 0.45, 0.5, 2.0])
-            add_para(doc, "Most remaining errors are semantic boundary cases involving class overlap or misleading surface cues, not label-format or preprocessing failures.")
+            add_para(doc, "Most remaining errors are semantic boundary cases involving class overlap or misleading surface cues, not label-format or preprocessing failures. Business/Sci-Tech cross-confusions account for 298 of the LSTM's 669 test errors (44.5%) and 293 of the Transformer's 665 test errors (44.1%).")
         else:
             for para in body.split("\n\n"):
                 clean = para.strip()
