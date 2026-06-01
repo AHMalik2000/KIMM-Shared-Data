@@ -8,7 +8,7 @@ This folder contains the submission-facing artifacts generated from `notebooks/a
 - `ag_news_final_report.docx`: final report, excluding the AI Usage Appendix.
 - `ag_news_ai_usage_appendix.docx`: standalone AI Usage Appendix.
 - `ag_news_final_report_with_ai_appendix.docx`: combined report plus appendix for convenience.
-- `ag_news_lstm_transformer_presentation.pptx`: 10-slide presentation for the 8-10 minute talk.
+- `ag_news_lstm_transformer_presentation.pptx`: 11-slide presentation for the 8-10 minute talk, with Q&A preparation in the script.
 
 ## Source Files
 

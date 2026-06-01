@@ -84,6 +84,23 @@ def excerpt(text: str, limit: int = 96) -> str:
     return clean[: limit - 3].rstrip() + "..."
 
 
+def truncation_note(row: dict[str, str]) -> str:
+    text = row["text"]
+    if "Olympics" in text:
+        return "Possible; long live-report format may exceed 128 tokens."
+    if "Intel" in text:
+        return "Unlikely; company and product cues appear early."
+    if "Wildfires" in text:
+        return "Unlikely; wildfire/prediction cues appear early."
+    if "Google IPO" in text:
+        return "Unlikely; IPO cues appear early."
+    if "T. rex" in text:
+        return "No; short item fits within the limit."
+    if "IBM" in text:
+        return "Unlikely; hiring/company cues appear early."
+    return "Uncertain."
+
+
 def build_markdown() -> dict[str, str]:
     main = read_csv("main_results.csv")
     params = read_csv("parameter_counts.csv")
@@ -107,8 +124,19 @@ def build_markdown() -> dict[str, str]:
         ["Optimizer / learning rate", "Adam / 1e-3", "Adam / 1e-3"],
         ["Epochs / batch size", "6 / 64", "6 / 64"],
     ]
+    baseline_accuracy = {
+        r["model"]: float(r["valid_accuracy"])
+        for r in dataset_ablation
+        if float(r["train_fraction"]) == 0.25
+    }
     ablation_rows = [
-        [r["model"], f'{float(r["train_fraction"]):.0%}', fmt(r["valid_accuracy"]), fmt(r["valid_macro_f1"])]
+        [
+            r["model"],
+            f'{float(r["train_fraction"]):.0%}',
+            fmt(r["valid_accuracy"]),
+            fmt(r["valid_macro_f1"]),
+            f'{(float(r["valid_accuracy"]) - baseline_accuracy[r["model"]]) * 100:+.2f} pp',
+        ]
         for r in dataset_ablation
     ]
     seq_rows = [
@@ -124,6 +152,7 @@ def build_markdown() -> dict[str, str]:
             r["transformer_pred_name"],
             fmt(r["lstm_confidence"]),
             fmt(r["transformer_confidence"]),
+            truncation_note(r),
             failure_reason(r),
         ]
         for i, r in enumerate(failures)
@@ -166,33 +195,47 @@ Figure 2: LSTM final test confusion matrix
 
 Figure 3: Transformer Encoder final test confusion matrix
 
-Table 1: Trainable parameter counts
+Table 1: Dataset split sizes
 
-Table 2: Final model configuration and hyperparameters
+Table 2: Class distribution by split
 
-Table 3: Main validation and test results
+Table 3: Trainable parameter counts
 
-Table 4: Dataset-size ablation results
+Table 4: Final model configuration and hyperparameters
 
-Table 5: Optional sequence-length ablation results
+Table 5: Main validation and test results
 
-Table 6: Selected misclassified examples
+Table 6: Dataset-size ablation results
 
-## Motivation
+Table 7: Optional sequence-length ablation results
 
-Text classification is one of the standard ways to evaluate whether a neural network can turn raw language into useful categories. In this report, I compare an LSTM classifier and a Transformer Encoder classifier on the same AG News task. The purpose is not only to see which model gives a slightly higher accuracy, but to evaluate how the two architectures behave when the dataset, preprocessing, training budget, and metrics are controlled.
+Table 8: Selected misclassified examples
+
+## Introduction
+
+Text classification is one of the standard ways to evaluate whether a neural network can turn raw language into useful categories. In this report, I compare an LSTM classifier and a Transformer Encoder classifier on the same AG News task. The research question is: when dataset source, preprocessing, training budget, and metrics are controlled, does the recurrent LSTM or the self-attention Transformer Encoder give better classification performance, data efficiency, and error behavior?
 
 The comparison is interesting because the two models represent different assumptions about sequence data. The LSTM reads the text recurrently and carries information through a hidden state. The Transformer Encoder uses self-attention, allowing every token to interact with other tokens directly. In theory, the Transformer should have more flexible global context modeling, while the LSTM may be more stable when the amount of data is reduced.
 
-## Background
+## Dataset
 
 AG News is a four-class news classification dataset. Each input is a short news text, and the model predicts one of four categories: `World`, `Sports`, `Business`, or `Sci/Tech`. The project uses Hugging Face `fancyzhx/ag_news` as the only dataset source. The official training split was divided into 108,000 training examples and 12,000 validation examples using `train_test_split(test_size=0.1, seed=42)`. The official test split contains 7,600 examples and was reserved for final evaluation only.
 
-The test split is balanced, with 1,900 examples per class. The training split is also nearly balanced: 26,991 World, 26,966 Sports, 27,100 Business, and 26,943 Sci/Tech examples. Labels were verified as integer class indices `0, 1, 2, 3`, which matches the requirement for `torch.nn.CrossEntropyLoss`.
+| Split | Samples | Use |
+| --- | --- | --- |
+| Train | 108,000 | Vocabulary construction and model fitting |
+| Validation | 12,000 | Model comparison, ablation evaluation, and interpretation |
+| Test | 7,600 | Final evaluation only |
 
-For preprocessing, the text was tokenized with a reproducible regular-expression tokenizer. The vocabulary was built only from the training split to avoid vocabulary leakage. The vocabulary size was capped at 20,000 tokens, with reserved indices for padding and unknown tokens. The main comparison used a maximum sequence length of 128 tokens. Both models received the same padded and truncated token IDs, and padding masks were used during LSTM pooling and Transformer attention.
+| Split | World | Sports | Business | Sci/Tech |
+| --- | --- | --- | --- | --- |
+| Train | 26,991 | 26,966 | 27,100 | 26,943 |
+| Validation | 3,009 | 3,034 | 2,900 | 3,057 |
+| Test | 1,900 | 1,900 | 1,900 | 1,900 |
 
-## Model Development
+Labels were verified as integer class indices `0, 1, 2, 3`, matching the requirement for `torch.nn.CrossEntropyLoss`. For preprocessing, the text was tokenized with a reproducible regular-expression tokenizer. The vocabulary was built only from the training split to avoid vocabulary leakage. The vocabulary size was capped at 20,000 tokens, with reserved indices for padding and unknown tokens. Tokens outside this train-built vocabulary map to `<unk>`, and the 20,000-token cap was kept fixed for both architectures and all main ablations. The main comparison used a maximum sequence length of 128 tokens. Both models received the same padded and truncated token IDs, and padding masks were used during LSTM pooling and Transformer attention.
+
+## Models
 
 The first model is a bidirectional LSTM classifier. It uses an embedding layer, a one-layer bidirectional LSTM, masked mean pooling, dropout, and a final linear classifier. The second model is a Transformer Encoder classifier. It uses an embedding layer, learned positional embeddings, two Transformer Encoder layers, four attention heads, feedforward dimension 512, masked mean pooling, dropout, and a final linear classifier. Both models were trained from scratch, without pretrained embeddings or pretrained language models.
 
@@ -200,25 +243,27 @@ The first model is a bidirectional LSTM classifier. It uses an embedding layer, 
 
     {table_md(["Setting", "LSTM", "Transformer Encoder"], hyperparam_rows)}
 
-The parameter counts are reasonably comparable for this assignment. The Transformer Encoder has about 5.2% more trainable parameters than the LSTM, so I treat its small final metric advantage cautiously.
+The parameter counts are reasonably comparable for this assignment. The Transformer Encoder has about 5.2% more trainable parameters than the LSTM, so I treat its small final metric advantage cautiously. Most parameters in both models come from the shared embedding table: `20,000 × 128 = 2,560,000` embedding parameters, or about 90.6% of the LSTM and 86.1% of the Transformer Encoder. The non-embedding encoder and classifier components differ by about 148,224 parameters, so the total-size mismatch is modest but still worth acknowledging when interpreting small metric gaps.
 
-## Experimental Verification
+## Experiments
 
 The main comparison trained both models for 6 epochs using Adam, learning rate `1e-3`, batch size 64, dropout 0.2, seed 42, and CPU execution. The evaluation metrics were accuracy and macro F1-score. Macro F1 was included because AG News has multiple classes and the assignment requires class-sensitive evaluation, even though the dataset is nearly balanced.
 
-The required ablation changed one major factor: the fraction of training data. The tested fractions were 25%, 50%, and 100% of the training split. The hypothesis was that the LSTM would be more stable with less data, while the Transformer Encoder would benefit more from the full dataset because self-attention has greater capacity.
+The required ablation changed one major factor: the fraction of training data. The tested fractions were 25%, 50%, and 100% of the training split. The hypothesis was that the LSTM would be more stable with less data, while the Transformer Encoder would benefit more from the full dataset because self-attention has greater capacity. The 100% ablation run is not numerically identical to the main-comparison run because the ablation helper shuffles the selected training indices even when the selected fraction is 100%; this changes the minibatch order while keeping the same examples, seed, and hyperparameters.
 
-An optional extension compared maximum sequence lengths of 128 and 256 tokens. This tested whether longer context improved validation performance enough to justify the additional training cost.
+An optional extension compared maximum sequence lengths of 128 and 256 tokens. This tested whether longer context improved validation performance enough to justify the additional training cost. The notebook also suppresses the PyTorch nested-tensor prototype warning so that final outputs focus on project-relevant results rather than a harmless implementation warning.
 
-## Results and Interpretation
+## Results
 
 {table_md(["Model", "Split", "Loss", "Accuracy", "Macro F1"], main_rows)}
 
 Both models reached similar final performance. On the official test split, the LSTM achieved 0.9120 accuracy and 0.9118 macro F1. The Transformer Encoder achieved 0.9125 accuracy and 0.9126 macro F1. The Transformer Encoder therefore performed slightly better on the final test metrics, but the difference is small and should not be overinterpreted as a decisive architectural win.
 
+The epoch-1 validation results show a convergence-speed difference: the LSTM reached 0.8957 validation accuracy after one epoch, while the Transformer Encoder reached 0.8835. This suggests that the LSTM reached a usable validation accuracy faster in the first stage of training, even though the Transformer Encoder slightly surpassed it by the final test evaluation.
+
 The loss curves show that both models continued to reduce training loss while validation loss stopped improving and then increased by the final epoch. This indicates overfitting by epoch 6. The LSTM had a sharper training-validation loss gap by the final epoch, while the Transformer Encoder retained slightly lower validation and test loss. A reasonable next experiment would tune early stopping or regularization using the validation set.
 
-The confusion matrices show that Sports was the easiest class for both models. The largest recurring confusion was between Business and Sci/Tech. For the LSTM, 177 Business items were predicted as Sci/Tech and 121 Sci/Tech items were predicted as Business. For the Transformer Encoder, 200 Business items were predicted as Sci/Tech and 93 Sci/Tech items were predicted as Business. This pattern is expected because technology-company stories often contain both market and technical language.
+The confusion matrices show that Sports was the easiest class for both models. The largest recurring confusion was between Business and Sci/Tech. For the LSTM, 177 Business items were predicted as Sci/Tech and 121 Sci/Tech items were predicted as Business. For the Transformer Encoder, 200 Business items were predicted as Sci/Tech and 93 Sci/Tech items were predicted as Business. This directional asymmetry suggests that the Transformer Encoder more aggressively predicts Sci/Tech for business stories with technology-company surface terms, while the LSTM more often maps Sci/Tech stories back toward Business.
 
 Figures used for the final report:
 
@@ -232,9 +277,9 @@ Figures used for the final report:
 
 Hypothesis: the LSTM will be more stable with limited training data, while the Transformer Encoder will benefit more from the full dataset. The changed variable was training-set fraction. The controlled variables were dataset source, train/validation split, tokenizer, vocabulary, maximum sequence length, optimizer, learning rate, batch size, epoch count, metrics, and validation evaluation.
 
-{table_md(["Model", "Training fraction", "Validation accuracy", "Validation macro F1"], ablation_rows)}
+{table_md(["Model", "Training fraction", "Validation accuracy", "Validation macro F1", "Accuracy gain vs 25%"], ablation_rows)}
 
-The ablation supports the hypothesis. At 25% training data, the LSTM slightly outperformed the Transformer Encoder. At 50%, the LSTM again had higher validation accuracy and macro F1. At 100%, the Transformer Encoder moved ahead. This suggests that the LSTM was more data-efficient in lower-data settings, while the Transformer Encoder benefited more from access to the full training split.
+The ablation supports the hypothesis. At 25% training data, the LSTM slightly outperformed the Transformer Encoder. At 50%, the LSTM again had higher validation accuracy and macro F1. At 100%, the Transformer Encoder moved ahead. Quantitatively, the LSTM gained about +3.70 percentage points from 25% to 100% training data, while the Transformer Encoder gained about +4.47 percentage points. This provides numerical evidence that the Transformer Encoder benefited more from access to the full training split, while the LSTM was more data-efficient in lower-data settings.
 
 The optional sequence-length ablation is shown below.
 
@@ -246,17 +291,17 @@ Increasing maximum sequence length from 128 to 256 did not improve validation pe
 
 The table below gives six representative misclassified test examples. It includes cases missed by both models, cases missed only by the LSTM, and cases missed only by the Transformer Encoder.
 
-{table_md(["#", "Input excerpt", "True label", "LSTM prediction", "Transformer prediction", "LSTM conf.", "Transformer conf.", "Likely reason"], failure_rows)}
+{table_md(["#", "Input excerpt", "True label", "LSTM prediction", "Transformer prediction", "LSTM conf.", "Transformer conf.", "Truncation note", "Likely reason"], failure_rows)}
 
-The selected errors show that the two models often fail on semantic boundary cases. Some examples contain surface words strongly associated with a different news section, such as an Olympics item labeled World but predicted as Sports by both models. Other examples involve technology companies or IPOs, where Business and Sci/Tech labels overlap. The models therefore fail similarly when the text has ambiguous section cues, but they also show different single-model errors: the LSTM misread some science/world-style items, while the Transformer misread some short Sci/Tech items as Business.
+The selected errors show that the two models often fail on semantic boundary cases. Some examples contain surface words strongly associated with a different news section, such as an Olympics item labeled World but predicted as Sports by both models; this is also the example where truncation is most plausible because live-report text can exceed the 128-token limit. Other examples involve technology companies or IPOs, where Business and Sci/Tech labels overlap and the main disambiguating cues appear early enough that truncation is unlikely to be the primary cause. Example 3 is also informative for calibration: the LSTM's incorrect World prediction has only 0.4821 confidence, which makes it a borderline error rather than a strong commitment, while the Transformer Encoder is highly confident in the correct Sci/Tech label at 0.9785. Overall, the models fail similarly when the text has ambiguous section cues, but they also show different single-model errors: the LSTM misread some science/world-style items, while the Transformer misread some short Sci/Tech items as Business.
 
 ## Conclusion
 
-Both from-scratch models performed well on AG News under the controlled setup, reaching about 91.2% final test accuracy. The Transformer Encoder achieved the best final test metrics, but only by a small margin. The LSTM was stronger in lower-data ablation settings, while the Transformer Encoder benefited more from the full training set.
+Both from-scratch models performed well on AG News under the controlled setup, reaching about 91.2% final test accuracy. The Transformer Encoder achieved the best final test metrics, but only by a small margin. The LSTM converged faster in the first epoch and was stronger in lower-data ablation settings, while the Transformer Encoder benefited more from the full training set.
 
-The required dataset-size ablation supports the original data-efficiency hypothesis. The optional sequence-length ablation showed that simply increasing maximum sequence length from 128 to 256 did not improve validation metrics. The most reasonable next experiment would be to tune early stopping or regularization, because both models show overfitting by the final epoch.
+The required dataset-size ablation supports the original data-efficiency hypothesis. The optional sequence-length ablation showed that simply increasing maximum sequence length from 128 to 256 did not improve validation metrics. The most reasonable next experiment would be to tune early stopping or regularization, because both models show overfitting by the final epoch. A further limitation is that the ablations were run with a single seed; repeating the comparison across multiple seeds would make the data-efficiency conclusion more statistically robust.
 
-## Appendix
+## AI Usage Appendix
 
 The complete notebook and generated output files are included in the project repository. The AI Usage Appendix is provided as a separate required appendix and also included in the combined report deliverable.
 
@@ -272,23 +317,23 @@ PyTorch documentation for recurrent layers, Transformer Encoder layers, and `tor
 
 ## Tools Used
 
-Codex was used for project planning, document review, notebook-result summarization, report drafting, presentation drafting, and final deliverable packaging.
+Codex was used for project planning, code drafting support, debugging review, document review, notebook-result summarization, report editing, presentation drafting, and final deliverable packaging.
 
 ## What AI Was Used For
 
-AI was used to translate the assignment requirements into a controlled experiment plan, check the scaffold against dataset-source and test-set rules, draft report and presentation text from verified notebook outputs, and identify concise interpretations of the metric tables, ablation results, loss curves, confusion matrices, and selected misclassifications.
+AI was used to translate the assignment requirements into a controlled experiment plan, check the scaffold against dataset-source and test-set rules, draft and review PyTorch notebook components, draft report and presentation text from verified notebook outputs, and identify concise interpretations of the metric tables, ablation results, loss curves, confusion matrices, and selected misclassifications. For code-level work, AI assistance was used to draft or review the model class structure, shared `run_epoch` training/evaluation utility, plotting functions, and confusion-matrix/failure-analysis table generation. All generated code was inspected and run cell-by-cell, and the masked mean pooling and Transformer padding-mask logic were manually checked against the attention masks.
 
 ## Incorrect, Incomplete, Or Misleading AI Outputs
 
-Some early scaffold text still described outputs as pending after the notebook had already been run. That wording was corrected in the project README, report notes, and presentation notes. Some notebook markdown cells also contained interpretation placeholders after outputs were generated; those were replaced with result-aware interpretations. The team also had to ensure that no claim treated the small Transformer Encoder metric lead as a large or decisive result.
+Some early scaffold text still described outputs as pending after the notebook had already been run. That wording was corrected in the project README, report notes, and presentation notes. Some notebook markdown cells also contained interpretation placeholders after outputs were generated; those were replaced with result-aware interpretations. During code review, the team also checked that AI-assisted examples did not apply `softmax` before `CrossEntropyLoss`, did not normalize confusion matrices when raw error counts were needed, and did not use the official test split during model selection or ablation. The team also had to ensure that no claim treated the small Transformer Encoder metric lead as a large or decisive result.
 
 ## Team Modifications And Decisions
 
-The team kept the project constrained to one dataset source, Hugging Face `fancyzhx/ag_news`, and required the official test split to be used only for final evaluation. The team selected dataset-size ablation as the required ablation and kept sequence length as an optional extension. The team decided to interpret the results conservatively: the Transformer Encoder was slightly better on the final test split, while the LSTM was more data-efficient in the 25% and 50% training-data settings.
+The team kept the project constrained to one dataset source, Hugging Face `fancyzhx/ag_news`, and required the official test split to be used only for final evaluation. The team selected dataset-size ablation as the required ablation and kept sequence length as an optional extension. The team decided to interpret the results conservatively: the Transformer Encoder was slightly better on the final test split, while the LSTM was more data-efficient in the 25% and 50% training-data settings. The team also added explicit checks for integer labels, train-only vocabulary construction, padding masks, and reproducible seeds rather than relying on generated code without verification.
 
 ## Effect Of AI Use
 
-AI reduced the time needed to organize requirements, audit deliverables, and draft clear explanations. The final responsibility remains with the team: all notebook outputs, figures, tables, code, and claims must be reviewed and approved before submission.
+AI reduced the time needed to organize requirements, audit deliverables, draft code scaffolds, and write clear explanations. The final responsibility remains with the team: all notebook outputs, figures, tables, code, and claims must be reviewed and approved before submission.
 """
 
     slides_md = """# Final Presentation Slide Plan
@@ -338,6 +383,20 @@ Claim: LSTM is more stable with less data; Transformer benefits from the full da
 ## Slide 11 - Conclusion
 
 Claim: Architecture differences appear most clearly in data efficiency and failure patterns.
+
+## Anticipated Q&A
+
+Q1: Why is the Transformer Encoder better with more data?
+A1: Its self-attention layers have higher capacity to model token interactions, so they appear to benefit more once the full training split is available.
+
+Q2: Would early stopping change the conclusion?
+A2: It might improve both models because validation loss rises by epoch 6, but the final test gap is already small, so the conservative conclusion would likely remain.
+
+Q3: Why use macro F1 if AG News is balanced?
+A3: Macro F1 is required by the assignment and still confirms that performance is not hiding a severe class-specific failure.
+
+Q4: Why did 256 tokens hurt performance?
+A4: Longer inputs add cost and noise under the same architecture and epoch budget; the key AG News cues usually appear early.
 """
 
     return {

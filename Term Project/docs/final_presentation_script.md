@@ -45,3 +45,17 @@ Claim: LSTM is more stable with less data; Transformer benefits from the full da
 ## Slide 11 - Conclusion
 
 Claim: Architecture differences appear most clearly in data efficiency and failure patterns.
+
+## Anticipated Q&A
+
+Q1: Why is the Transformer Encoder better with more data?
+A1: Its self-attention layers have higher capacity to model token interactions, so they appear to benefit more once the full training split is available.
+
+Q2: Would early stopping change the conclusion?
+A2: It might improve both models because validation loss rises by epoch 6, but the final test gap is already small, so the conservative conclusion would likely remain.
+
+Q3: Why use macro F1 if AG News is balanced?
+A3: Macro F1 is required by the assignment and still confirms that performance is not hiding a severe class-specific failure.
+
+Q4: Why did 256 tokens hurt performance?
+A4: Longer inputs add cost and noise under the same architecture and epoch budget; the key AG News cues usually appear early.

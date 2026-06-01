@@ -7,3 +7,5 @@ pip-system-certs
 scikit-learn
 seaborn
 torch
+python-docx
+python-pptx
