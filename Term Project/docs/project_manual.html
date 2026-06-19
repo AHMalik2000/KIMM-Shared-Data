@@ -1,0 +1,1336 @@
+<!DOCTYPE html><html><head>
+<title>project_manual.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/*
+
+Arduino® Light Theme - Stefania Mellai <s.mellai@arduino.cc>
+
+*/
+
+.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 0.5em;
+  background: #FFFFFF;
+}
+
+.hljs,
+.hljs-subst {
+  color: #434f54;
+}
+
+.hljs-keyword,
+.hljs-attribute,
+.hljs-selector-tag,
+.hljs-doctag,
+.hljs-name {
+  color: #00979D;
+}
+
+.hljs-built_in,
+.hljs-literal,
+.hljs-bullet,
+.hljs-code,
+.hljs-addition {
+  color: #D35400;
+}
+
+.hljs-regexp,
+.hljs-symbol,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-link,
+.hljs-selector-attr,
+.hljs-selector-pseudo {
+  color: #00979D;
+}
+
+.hljs-type,
+.hljs-string,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-quote,
+.hljs-template-tag,
+.hljs-deletion {
+  color: #005C5F;
+}
+
+.hljs-title,
+.hljs-section {
+  color: #880000;
+  font-weight: bold;
+}
+
+.hljs-comment {
+  color: rgba(149,165,166,.8);
+}
+
+.hljs-meta-keyword {
+  color: #728E00;
+}
+
+.hljs-meta {
+  color: #434f54;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+
+.hljs-function {
+  color: #728E00;
+}
+
+.hljs-number {
+  color: #8A7B52;  
+}
+
+</style>
+
+<style>
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family:   "HelveticaNeue-Light", sans-serif, "宋体","Segoe WPC", "Segoe UI", "SFUIText-Light","Droid Sans Fallback";
+	font-size: 18px;
+	padding: 0 12px;
+	line-height: 1.6;
+	word-wrap: break-word;
+	color: #333333;
+}
+
+.content-wrapper{
+	max-width: 860px;
+    margin: 0 auto;
+    padding: 0 30px;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	color: #4080D0;
+	text-decoration: none;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom: 1px solid #eee;
+}
+
+
+h2{
+	padding-bottom: .3em;
+    font-size: 2em;
+    line-height: 1.225;
+    border-bottom: 1px solid #eee;
+}
+
+h3{
+	font-size: 1.75em;
+    line-height: 1.225;
+}
+
+h1, h2, h3 {
+	font-weight: bold;
+}
+
+h1 code,
+h2 code,
+h3 code,
+h4 code,
+h5 code,
+h6 code {
+	font-size: inherit;
+	line-height: auto;
+}
+
+a:hover {
+	color: #4080D0;
+	text-decoration: underline;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left: 5px solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 14px;
+	line-height: 19px;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+.mac code {
+	font-size: 12px;
+	line-height: 18px;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+/** Theming */
+
+.vscode-light,
+.vscode-light pre code {
+	color: rgb(30, 30, 30);
+}
+
+.vscode-dark,
+.vscode-dark pre code {
+	color: #DDD;
+}
+
+.vscode-high-contrast,
+.vscode-high-contrast pre code {
+	color: white;
+}
+
+.vscode-light code {
+	color: #A31515;
+}
+
+.vscode-dark code {
+	color: #D7BA7D;
+}
+
+.vscode-light pre:not(.hljs),
+.vscode-light code > div {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre:not(.hljs),
+.vscode-dark code > div {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre:not(.hljs),
+.vscode-high-contrast code > div {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+.vscode-light blockquote,
+.vscode-dark blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.vscode-high-contrast blockquote {
+	background: transparent;
+	border-color: #fff;
+}
+</style>
+
+<style>
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+.table-of-contents li{
+	list-style-type: initial;
+}
+</style>
+
+<style>
+@font-face{font-family:KaTeX_AMS;font-style:normal;font-weight:400;src:url(fonts/KaTeX_AMS-Regular.woff2) format("woff2"),url(fonts/KaTeX_AMS-Regular.woff) format("woff"),url(fonts/KaTeX_AMS-Regular.ttf) format("truetype")}@font-face{font-family:KaTeX_Caligraphic;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Caligraphic-Bold.woff2) format("woff2"),url(fonts/KaTeX_Caligraphic-Bold.woff) format("woff"),url(fonts/KaTeX_Caligraphic-Bold.ttf) format("truetype")}@font-face{font-family:KaTeX_Caligraphic;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Caligraphic-Regular.woff2) format("woff2"),url(fonts/KaTeX_Caligraphic-Regular.woff) format("woff"),url(fonts/KaTeX_Caligraphic-Regular.ttf) format("truetype")}@font-face{font-family:KaTeX_Fraktur;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Fraktur-Bold.woff2) format("woff2"),url(fonts/KaTeX_Fraktur-Bold.woff) format("woff"),url(fonts/KaTeX_Fraktur-Bold.ttf) format("truetype")}@font-face{font-family:KaTeX_Fraktur;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Fraktur-Regular.woff2) format("woff2"),url(fonts/KaTeX_Fraktur-Regular.woff) format("woff"),url(fonts/KaTeX_Fraktur-Regular.ttf) format("truetype")}@font-face{font-family:KaTeX_Main;font-style:normal;font-weight:700;src:url(fonts/KaTeX_Main-Bold.woff2) format("woff2"),url(fonts/KaTeX_Main-Bold.woff) format("woff"),url(fonts/KaTeX_Main-Bold.ttf) format("truetype")}@font-face{font-family:KaTeX_Main;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Main-BoldItalic.woff2) format("woff2"),url(fonts/KaTeX_Main-BoldItalic.woff) format("woff"),url(fonts/KaTeX_Main-BoldItalic.ttf) format("truetype")}@font-face{font-family:KaTeX_Main;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Main-Italic.woff2) format("woff2"),url(fonts/KaTeX_Main-Italic.woff) format("woff"),url(fonts/KaTeX_Main-Italic.ttf) format("truetype")}@font-face{font-family:KaTeX_Main;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Main-Regular.woff2) format("woff2"),url(fonts/KaTeX_Main-Regular.woff) format("woff"),url(fonts/KaTeX_Main-Regular.ttf) format("truetype")}@font-face{font-family:KaTeX_Math;font-style:italic;font-weight:700;src:url(fonts/KaTeX_Math-BoldItalic.woff2) format("woff2"),url(fonts/KaTeX_Math-BoldItalic.woff) format("woff"),url(fonts/KaTeX_Math-BoldItalic.ttf) format("truetype")}@font-face{font-family:KaTeX_Math;font-style:italic;font-weight:400;src:url(fonts/KaTeX_Math-Italic.woff2) format("woff2"),url(fonts/KaTeX_Math-Italic.woff) format("woff"),url(fonts/KaTeX_Math-Italic.ttf) format("truetype")}@font-face{font-family:"KaTeX_SansSerif";font-style:normal;font-weight:700;src:url(fonts/KaTeX_SansSerif-Bold.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Bold.woff) format("woff"),url(fonts/KaTeX_SansSerif-Bold.ttf) format("truetype")}@font-face{font-family:"KaTeX_SansSerif";font-style:italic;font-weight:400;src:url(fonts/KaTeX_SansSerif-Italic.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Italic.woff) format("woff"),url(fonts/KaTeX_SansSerif-Italic.ttf) format("truetype")}@font-face{font-family:"KaTeX_SansSerif";font-style:normal;font-weight:400;src:url(fonts/KaTeX_SansSerif-Regular.woff2) format("woff2"),url(fonts/KaTeX_SansSerif-Regular.woff) format("woff"),url(fonts/KaTeX_SansSerif-Regular.ttf) format("truetype")}@font-face{font-family:KaTeX_Script;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Script-Regular.woff2) format("woff2"),url(fonts/KaTeX_Script-Regular.woff) format("woff"),url(fonts/KaTeX_Script-Regular.ttf) format("truetype")}@font-face{font-family:KaTeX_Size1;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size1-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size1-Regular.woff) format("woff"),url(fonts/KaTeX_Size1-Regular.ttf) format("truetype")}@font-face{font-family:KaTeX_Size2;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size2-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size2-Regular.woff) format("woff"),url(fonts/KaTeX_Size2-Regular.ttf) format("truetype")}@font-face{font-family:KaTeX_Size3;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size3-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size3-Regular.woff) format("woff"),url(fonts/KaTeX_Size3-Regular.ttf) format("truetype")}@font-face{font-family:KaTeX_Size4;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Size4-Regular.woff2) format("woff2"),url(fonts/KaTeX_Size4-Regular.woff) format("woff"),url(fonts/KaTeX_Size4-Regular.ttf) format("truetype")}@font-face{font-family:KaTeX_Typewriter;font-style:normal;font-weight:400;src:url(fonts/KaTeX_Typewriter-Regular.woff2) format("woff2"),url(fonts/KaTeX_Typewriter-Regular.woff) format("woff"),url(fonts/KaTeX_Typewriter-Regular.ttf) format("truetype")}.katex{text-rendering:auto;font:normal 1.21em KaTeX_Main,Times New Roman,serif;line-height:1.2;text-indent:0}.katex *{-ms-high-contrast-adjust:none!important;border-color:currentColor}.katex .katex-version:after{content:"0.16.2"}.katex .katex-mathml{clip:rect(1px,1px,1px,1px);border:0;height:1px;overflow:hidden;padding:0;position:absolute;width:1px}.katex .katex-html>.newline{display:block}.katex .base{position:relative;white-space:nowrap;width:-webkit-min-content;width:-moz-min-content;width:min-content}.katex .base,.katex .strut{display:inline-block}.katex .textbf{font-weight:700}.katex .textit{font-style:italic}.katex .textrm{font-family:KaTeX_Main}.katex .textsf{font-family:KaTeX_SansSerif}.katex .texttt{font-family:KaTeX_Typewriter}.katex .mathnormal{font-family:KaTeX_Math;font-style:italic}.katex .mathit{font-family:KaTeX_Main;font-style:italic}.katex .mathrm{font-style:normal}.katex .mathbf{font-family:KaTeX_Main;font-weight:700}.katex .boldsymbol{font-family:KaTeX_Math;font-style:italic;font-weight:700}.katex .amsrm,.katex .mathbb,.katex .textbb{font-family:KaTeX_AMS}.katex .mathcal{font-family:KaTeX_Caligraphic}.katex .mathfrak,.katex .textfrak{font-family:KaTeX_Fraktur}.katex .mathtt{font-family:KaTeX_Typewriter}.katex .mathscr,.katex .textscr{font-family:KaTeX_Script}.katex .mathsf,.katex .textsf{font-family:KaTeX_SansSerif}.katex .mathboldsf,.katex .textboldsf{font-family:KaTeX_SansSerif;font-weight:700}.katex .mathitsf,.katex .textitsf{font-family:KaTeX_SansSerif;font-style:italic}.katex .mainrm{font-family:KaTeX_Main;font-style:normal}.katex .vlist-t{border-collapse:collapse;display:inline-table;table-layout:fixed}.katex .vlist-r{display:table-row}.katex .vlist{display:table-cell;position:relative;vertical-align:bottom}.katex .vlist>span{display:block;height:0;position:relative}.katex .vlist>span>span{display:inline-block}.katex .vlist>span>.pstrut{overflow:hidden;width:0}.katex .vlist-t2{margin-right:-2px}.katex .vlist-s{display:table-cell;font-size:1px;min-width:2px;vertical-align:bottom;width:2px}.katex .vbox{align-items:baseline;display:inline-flex;flex-direction:column}.katex .hbox{width:100%}.katex .hbox,.katex .thinbox{display:inline-flex;flex-direction:row}.katex .thinbox{max-width:0;width:0}.katex .msupsub{text-align:left}.katex .mfrac>span>span{text-align:center}.katex .mfrac .frac-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .hdashline,.katex .hline,.katex .mfrac .frac-line,.katex .overline .overline-line,.katex .rule,.katex .underline .underline-line{min-height:1px}.katex .mspace{display:inline-block}.katex .clap,.katex .llap,.katex .rlap{position:relative;width:0}.katex .clap>.inner,.katex .llap>.inner,.katex .rlap>.inner{position:absolute}.katex .clap>.fix,.katex .llap>.fix,.katex .rlap>.fix{display:inline-block}.katex .llap>.inner{right:0}.katex .clap>.inner,.katex .rlap>.inner{left:0}.katex .clap>.inner>span{margin-left:-50%;margin-right:50%}.katex .rule{border:0 solid;display:inline-block;position:relative}.katex .hline,.katex .overline .overline-line,.katex .underline .underline-line{border-bottom-style:solid;display:inline-block;width:100%}.katex .hdashline{border-bottom-style:dashed;display:inline-block;width:100%}.katex .sqrt>.root{margin-left:.27777778em;margin-right:-.55555556em}.katex .fontsize-ensurer.reset-size1.size1,.katex .sizing.reset-size1.size1{font-size:1em}.katex .fontsize-ensurer.reset-size1.size2,.katex .sizing.reset-size1.size2{font-size:1.2em}.katex .fontsize-ensurer.reset-size1.size3,.katex .sizing.reset-size1.size3{font-size:1.4em}.katex .fontsize-ensurer.reset-size1.size4,.katex .sizing.reset-size1.size4{font-size:1.6em}.katex .fontsize-ensurer.reset-size1.size5,.katex .sizing.reset-size1.size5{font-size:1.8em}.katex .fontsize-ensurer.reset-size1.size6,.katex .sizing.reset-size1.size6{font-size:2em}.katex .fontsize-ensurer.reset-size1.size7,.katex .sizing.reset-size1.size7{font-size:2.4em}.katex .fontsize-ensurer.reset-size1.size8,.katex .sizing.reset-size1.size8{font-size:2.88em}.katex .fontsize-ensurer.reset-size1.size9,.katex .sizing.reset-size1.size9{font-size:3.456em}.katex .fontsize-ensurer.reset-size1.size10,.katex .sizing.reset-size1.size10{font-size:4.148em}.katex .fontsize-ensurer.reset-size1.size11,.katex .sizing.reset-size1.size11{font-size:4.976em}.katex .fontsize-ensurer.reset-size2.size1,.katex .sizing.reset-size2.size1{font-size:.83333333em}.katex .fontsize-ensurer.reset-size2.size2,.katex .sizing.reset-size2.size2{font-size:1em}.katex .fontsize-ensurer.reset-size2.size3,.katex .sizing.reset-size2.size3{font-size:1.16666667em}.katex .fontsize-ensurer.reset-size2.size4,.katex .sizing.reset-size2.size4{font-size:1.33333333em}.katex .fontsize-ensurer.reset-size2.size5,.katex .sizing.reset-size2.size5{font-size:1.5em}.katex .fontsize-ensurer.reset-size2.size6,.katex .sizing.reset-size2.size6{font-size:1.66666667em}.katex .fontsize-ensurer.reset-size2.size7,.katex .sizing.reset-size2.size7{font-size:2em}.katex .fontsize-ensurer.reset-size2.size8,.katex .sizing.reset-size2.size8{font-size:2.4em}.katex .fontsize-ensurer.reset-size2.size9,.katex .sizing.reset-size2.size9{font-size:2.88em}.katex .fontsize-ensurer.reset-size2.size10,.katex .sizing.reset-size2.size10{font-size:3.45666667em}.katex .fontsize-ensurer.reset-size2.size11,.katex .sizing.reset-size2.size11{font-size:4.14666667em}.katex .fontsize-ensurer.reset-size3.size1,.katex .sizing.reset-size3.size1{font-size:.71428571em}.katex .fontsize-ensurer.reset-size3.size2,.katex .sizing.reset-size3.size2{font-size:.85714286em}.katex .fontsize-ensurer.reset-size3.size3,.katex .sizing.reset-size3.size3{font-size:1em}.katex .fontsize-ensurer.reset-size3.size4,.katex .sizing.reset-size3.size4{font-size:1.14285714em}.katex .fontsize-ensurer.reset-size3.size5,.katex .sizing.reset-size3.size5{font-size:1.28571429em}.katex .fontsize-ensurer.reset-size3.size6,.katex .sizing.reset-size3.size6{font-size:1.42857143em}.katex .fontsize-ensurer.reset-size3.size7,.katex .sizing.reset-size3.size7{font-size:1.71428571em}.katex .fontsize-ensurer.reset-size3.size8,.katex .sizing.reset-size3.size8{font-size:2.05714286em}.katex .fontsize-ensurer.reset-size3.size9,.katex .sizing.reset-size3.size9{font-size:2.46857143em}.katex .fontsize-ensurer.reset-size3.size10,.katex .sizing.reset-size3.size10{font-size:2.96285714em}.katex .fontsize-ensurer.reset-size3.size11,.katex .sizing.reset-size3.size11{font-size:3.55428571em}.katex .fontsize-ensurer.reset-size4.size1,.katex .sizing.reset-size4.size1{font-size:.625em}.katex .fontsize-ensurer.reset-size4.size2,.katex .sizing.reset-size4.size2{font-size:.75em}.katex .fontsize-ensurer.reset-size4.size3,.katex .sizing.reset-size4.size3{font-size:.875em}.katex .fontsize-ensurer.reset-size4.size4,.katex .sizing.reset-size4.size4{font-size:1em}.katex .fontsize-ensurer.reset-size4.size5,.katex .sizing.reset-size4.size5{font-size:1.125em}.katex .fontsize-ensurer.reset-size4.size6,.katex .sizing.reset-size4.size6{font-size:1.25em}.katex .fontsize-ensurer.reset-size4.size7,.katex .sizing.reset-size4.size7{font-size:1.5em}.katex .fontsize-ensurer.reset-size4.size8,.katex .sizing.reset-size4.size8{font-size:1.8em}.katex .fontsize-ensurer.reset-size4.size9,.katex .sizing.reset-size4.size9{font-size:2.16em}.katex .fontsize-ensurer.reset-size4.size10,.katex .sizing.reset-size4.size10{font-size:2.5925em}.katex .fontsize-ensurer.reset-size4.size11,.katex .sizing.reset-size4.size11{font-size:3.11em}.katex .fontsize-ensurer.reset-size5.size1,.katex .sizing.reset-size5.size1{font-size:.55555556em}.katex .fontsize-ensurer.reset-size5.size2,.katex .sizing.reset-size5.size2{font-size:.66666667em}.katex .fontsize-ensurer.reset-size5.size3,.katex .sizing.reset-size5.size3{font-size:.77777778em}.katex .fontsize-ensurer.reset-size5.size4,.katex .sizing.reset-size5.size4{font-size:.88888889em}.katex .fontsize-ensurer.reset-size5.size5,.katex .sizing.reset-size5.size5{font-size:1em}.katex .fontsize-ensurer.reset-size5.size6,.katex .sizing.reset-size5.size6{font-size:1.11111111em}.katex .fontsize-ensurer.reset-size5.size7,.katex .sizing.reset-size5.size7{font-size:1.33333333em}.katex .fontsize-ensurer.reset-size5.size8,.katex .sizing.reset-size5.size8{font-size:1.6em}.katex .fontsize-ensurer.reset-size5.size9,.katex .sizing.reset-size5.size9{font-size:1.92em}.katex .fontsize-ensurer.reset-size5.size10,.katex .sizing.reset-size5.size10{font-size:2.30444444em}.katex .fontsize-ensurer.reset-size5.size11,.katex .sizing.reset-size5.size11{font-size:2.76444444em}.katex .fontsize-ensurer.reset-size6.size1,.katex .sizing.reset-size6.size1{font-size:.5em}.katex .fontsize-ensurer.reset-size6.size2,.katex .sizing.reset-size6.size2{font-size:.6em}.katex .fontsize-ensurer.reset-size6.size3,.katex .sizing.reset-size6.size3{font-size:.7em}.katex .fontsize-ensurer.reset-size6.size4,.katex .sizing.reset-size6.size4{font-size:.8em}.katex .fontsize-ensurer.reset-size6.size5,.katex .sizing.reset-size6.size5{font-size:.9em}.katex .fontsize-ensurer.reset-size6.size6,.katex .sizing.reset-size6.size6{font-size:1em}.katex .fontsize-ensurer.reset-size6.size7,.katex .sizing.reset-size6.size7{font-size:1.2em}.katex .fontsize-ensurer.reset-size6.size8,.katex .sizing.reset-size6.size8{font-size:1.44em}.katex .fontsize-ensurer.reset-size6.size9,.katex .sizing.reset-size6.size9{font-size:1.728em}.katex .fontsize-ensurer.reset-size6.size10,.katex .sizing.reset-size6.size10{font-size:2.074em}.katex .fontsize-ensurer.reset-size6.size11,.katex .sizing.reset-size6.size11{font-size:2.488em}.katex .fontsize-ensurer.reset-size7.size1,.katex .sizing.reset-size7.size1{font-size:.41666667em}.katex .fontsize-ensurer.reset-size7.size2,.katex .sizing.reset-size7.size2{font-size:.5em}.katex .fontsize-ensurer.reset-size7.size3,.katex .sizing.reset-size7.size3{font-size:.58333333em}.katex .fontsize-ensurer.reset-size7.size4,.katex .sizing.reset-size7.size4{font-size:.66666667em}.katex .fontsize-ensurer.reset-size7.size5,.katex .sizing.reset-size7.size5{font-size:.75em}.katex .fontsize-ensurer.reset-size7.size6,.katex .sizing.reset-size7.size6{font-size:.83333333em}.katex .fontsize-ensurer.reset-size7.size7,.katex .sizing.reset-size7.size7{font-size:1em}.katex .fontsize-ensurer.reset-size7.size8,.katex .sizing.reset-size7.size8{font-size:1.2em}.katex .fontsize-ensurer.reset-size7.size9,.katex .sizing.reset-size7.size9{font-size:1.44em}.katex .fontsize-ensurer.reset-size7.size10,.katex .sizing.reset-size7.size10{font-size:1.72833333em}.katex .fontsize-ensurer.reset-size7.size11,.katex .sizing.reset-size7.size11{font-size:2.07333333em}.katex .fontsize-ensurer.reset-size8.size1,.katex .sizing.reset-size8.size1{font-size:.34722222em}.katex .fontsize-ensurer.reset-size8.size2,.katex .sizing.reset-size8.size2{font-size:.41666667em}.katex .fontsize-ensurer.reset-size8.size3,.katex .sizing.reset-size8.size3{font-size:.48611111em}.katex .fontsize-ensurer.reset-size8.size4,.katex .sizing.reset-size8.size4{font-size:.55555556em}.katex .fontsize-ensurer.reset-size8.size5,.katex .sizing.reset-size8.size5{font-size:.625em}.katex .fontsize-ensurer.reset-size8.size6,.katex .sizing.reset-size8.size6{font-size:.69444444em}.katex .fontsize-ensurer.reset-size8.size7,.katex .sizing.reset-size8.size7{font-size:.83333333em}.katex .fontsize-ensurer.reset-size8.size8,.katex .sizing.reset-size8.size8{font-size:1em}.katex .fontsize-ensurer.reset-size8.size9,.katex .sizing.reset-size8.size9{font-size:1.2em}.katex .fontsize-ensurer.reset-size8.size10,.katex .sizing.reset-size8.size10{font-size:1.44027778em}.katex .fontsize-ensurer.reset-size8.size11,.katex .sizing.reset-size8.size11{font-size:1.72777778em}.katex .fontsize-ensurer.reset-size9.size1,.katex .sizing.reset-size9.size1{font-size:.28935185em}.katex .fontsize-ensurer.reset-size9.size2,.katex .sizing.reset-size9.size2{font-size:.34722222em}.katex .fontsize-ensurer.reset-size9.size3,.katex .sizing.reset-size9.size3{font-size:.40509259em}.katex .fontsize-ensurer.reset-size9.size4,.katex .sizing.reset-size9.size4{font-size:.46296296em}.katex .fontsize-ensurer.reset-size9.size5,.katex .sizing.reset-size9.size5{font-size:.52083333em}.katex .fontsize-ensurer.reset-size9.size6,.katex .sizing.reset-size9.size6{font-size:.5787037em}.katex .fontsize-ensurer.reset-size9.size7,.katex .sizing.reset-size9.size7{font-size:.69444444em}.katex .fontsize-ensurer.reset-size9.size8,.katex .sizing.reset-size9.size8{font-size:.83333333em}.katex .fontsize-ensurer.reset-size9.size9,.katex .sizing.reset-size9.size9{font-size:1em}.katex .fontsize-ensurer.reset-size9.size10,.katex .sizing.reset-size9.size10{font-size:1.20023148em}.katex .fontsize-ensurer.reset-size9.size11,.katex .sizing.reset-size9.size11{font-size:1.43981481em}.katex .fontsize-ensurer.reset-size10.size1,.katex .sizing.reset-size10.size1{font-size:.24108004em}.katex .fontsize-ensurer.reset-size10.size2,.katex .sizing.reset-size10.size2{font-size:.28929605em}.katex .fontsize-ensurer.reset-size10.size3,.katex .sizing.reset-size10.size3{font-size:.33751205em}.katex .fontsize-ensurer.reset-size10.size4,.katex .sizing.reset-size10.size4{font-size:.38572806em}.katex .fontsize-ensurer.reset-size10.size5,.katex .sizing.reset-size10.size5{font-size:.43394407em}.katex .fontsize-ensurer.reset-size10.size6,.katex .sizing.reset-size10.size6{font-size:.48216008em}.katex .fontsize-ensurer.reset-size10.size7,.katex .sizing.reset-size10.size7{font-size:.57859209em}.katex .fontsize-ensurer.reset-size10.size8,.katex .sizing.reset-size10.size8{font-size:.69431051em}.katex .fontsize-ensurer.reset-size10.size9,.katex .sizing.reset-size10.size9{font-size:.83317261em}.katex .fontsize-ensurer.reset-size10.size10,.katex .sizing.reset-size10.size10{font-size:1em}.katex .fontsize-ensurer.reset-size10.size11,.katex .sizing.reset-size10.size11{font-size:1.19961427em}.katex .fontsize-ensurer.reset-size11.size1,.katex .sizing.reset-size11.size1{font-size:.20096463em}.katex .fontsize-ensurer.reset-size11.size2,.katex .sizing.reset-size11.size2{font-size:.24115756em}.katex .fontsize-ensurer.reset-size11.size3,.katex .sizing.reset-size11.size3{font-size:.28135048em}.katex .fontsize-ensurer.reset-size11.size4,.katex .sizing.reset-size11.size4{font-size:.32154341em}.katex .fontsize-ensurer.reset-size11.size5,.katex .sizing.reset-size11.size5{font-size:.36173633em}.katex .fontsize-ensurer.reset-size11.size6,.katex .sizing.reset-size11.size6{font-size:.40192926em}.katex .fontsize-ensurer.reset-size11.size7,.katex .sizing.reset-size11.size7{font-size:.48231511em}.katex .fontsize-ensurer.reset-size11.size8,.katex .sizing.reset-size11.size8{font-size:.57877814em}.katex .fontsize-ensurer.reset-size11.size9,.katex .sizing.reset-size11.size9{font-size:.69453376em}.katex .fontsize-ensurer.reset-size11.size10,.katex .sizing.reset-size11.size10{font-size:.83360129em}.katex .fontsize-ensurer.reset-size11.size11,.katex .sizing.reset-size11.size11{font-size:1em}.katex .delimsizing.size1{font-family:KaTeX_Size1}.katex .delimsizing.size2{font-family:KaTeX_Size2}.katex .delimsizing.size3{font-family:KaTeX_Size3}.katex .delimsizing.size4{font-family:KaTeX_Size4}.katex .delimsizing.mult .delim-size1>span{font-family:KaTeX_Size1}.katex .delimsizing.mult .delim-size4>span{font-family:KaTeX_Size4}.katex .nulldelimiter{display:inline-block;width:.12em}.katex .delimcenter,.katex .op-symbol{position:relative}.katex .op-symbol.small-op{font-family:KaTeX_Size1}.katex .op-symbol.large-op{font-family:KaTeX_Size2}.katex .accent>.vlist-t,.katex .op-limits>.vlist-t{text-align:center}.katex .accent .accent-body{position:relative}.katex .accent .accent-body:not(.accent-full){width:0}.katex .overlay{display:block}.katex .mtable .vertical-separator{display:inline-block;min-width:1px}.katex .mtable .arraycolsep{display:inline-block}.katex .mtable .col-align-c>.vlist-t{text-align:center}.katex .mtable .col-align-l>.vlist-t{text-align:left}.katex .mtable .col-align-r>.vlist-t{text-align:right}.katex .svg-align{text-align:left}.katex svg{fill:currentColor;stroke:currentColor;fill-rule:nonzero;fill-opacity:1;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;display:block;height:inherit;position:absolute;width:100%}.katex svg path{stroke:none}.katex img{border-style:none;max-height:none;max-width:none;min-height:0;min-width:0}.katex .stretchy{display:block;overflow:hidden;position:relative;width:100%}.katex .stretchy:after,.katex .stretchy:before{content:""}.katex .hide-tail{overflow:hidden;position:relative;width:100%}.katex .halfarrow-left{left:0;overflow:hidden;position:absolute;width:50.2%}.katex .halfarrow-right{overflow:hidden;position:absolute;right:0;width:50.2%}.katex .brace-left{left:0;overflow:hidden;position:absolute;width:25.1%}.katex .brace-center{left:25%;overflow:hidden;position:absolute;width:50%}.katex .brace-right{overflow:hidden;position:absolute;right:0;width:25.1%}.katex .x-arrow-pad{padding:0 .5em}.katex .cd-arrow-pad{padding:0 .55556em 0 .27778em}.katex .mover,.katex .munder,.katex .x-arrow{text-align:center}.katex .boxpad{padding:0 .3em}.katex .fbox,.katex .fcolorbox{border:.04em solid;box-sizing:border-box}.katex .cancel-pad{padding:0 .2em}.katex .cancel-lap{margin-left:-.2em;margin-right:-.2em}.katex .sout{border-bottom-style:solid;border-bottom-width:.08em}.katex .angl{border-right:.049em solid;border-top:.049em solid;box-sizing:border-box;margin-right:.03889em}.katex .anglpad{padding:0 .03889em}.katex .eqn-num:before{content:"(" counter(katexEqnNo) ")";counter-increment:katexEqnNo}.katex .mml-eqn-num:before{content:"(" counter(mmlEqnNo) ")";counter-increment:mmlEqnNo}.katex .mtr-glue{width:50%}.katex .cd-vert-arrow{display:inline-block;position:relative}.katex .cd-label-left{display:inline-block;position:absolute;right:calc(50% + .3em);text-align:left}.katex .cd-label-right{display:inline-block;left:calc(50% + .3em);position:absolute;text-align:right}.katex-display{display:block;margin:1em 0;text-align:center}.katex-display>.katex{display:block;text-align:center;white-space:nowrap}.katex-display>.katex>.katex-html{display:block;position:relative}.katex-display>.katex>.katex-html>.tag{position:absolute;right:0}.katex-display.leqno>.katex>.katex-html>.tag{left:0;right:auto}.katex-display.fleqn>.katex{padding-left:2em;text-align:left}body{counter-reset:katexEqnNo mmlEqnNo}
+
+</style>
+
+</head>
+<body>
+    <div class="content-wrapper">
+        <h1 id="ag-news-lstm-vs-transformer-encoder-project-manual" tabindex="-1">AG News LSTM vs Transformer Encoder Project Manual</h1>
+<h2 id="1.-purpose-of-this-manual" tabindex="-1">1. Purpose Of This Manual</h2>
+<p>This manual is a technical guide to the project in this repository. It explains the project background, the dataset, the two neural network models, the notebook workflow, the output artifacts, and the results that have been achieved so far.</p>
+<p>The project compares two from-scratch PyTorch text classifiers on AG News:</p>
+<ul>
+<li>A bidirectional LSTM classifier.</li>
+<li>A Transformer Encoder classifier.</li>
+</ul>
+<p>The goal is not just to choose the model with the highest final accuracy. The stronger goal is to understand how recurrent sequence modeling and self-attention behave under the same dataset source, preprocessing pipeline, validation split, training budget, metrics, and report constraints.</p>
+<p>The current repository state shows that the experiment notebook has been run, output tables and figures have been exported to <code>outputs/</code>, and final submission-facing deliverables have been generated in <code>deliverables/</code>.</p>
+<h2 id="2.-project-scope-and-constraints" tabindex="-1">2. Project Scope And Constraints</h2>
+<p>The project is an introductory deep learning term project using Python, Jupyter notebooks, and PyTorch. The main comparison is LSTM vs Transformer Encoder on AG News text classification.</p>
+<p>The important constraints are:</p>
+<ul>
+<li>Both models are trained from scratch.</li>
+<li>No pretrained language models, pretrained embeddings, BERT-style models, GPT-style models, or other pretrained text encoders are used.</li>
+<li>One dataset source is used for all experiments: Hugging Face <code>fancyzhx/ag_news</code>, loaded with <code>datasets.load_dataset("fancyzhx/ag_news")</code> [1, 2].</li>
+<li>The official AG News test split is reserved for final evaluation only.</li>
+<li>A validation set is created from the official training split with <code>train_test_split(test_size=0.1, seed=42)</code>, following the same idea as a reproducible random train/test split [9].</li>
+<li>The vocabulary is built only from the training split.</li>
+<li>Labels remain integer class indices <code>0</code>, <code>1</code>, <code>2</code>, and <code>3</code>, which is the format expected by <code>torch.nn.CrossEntropyLoss</code> for class-index targets.</li>
+<li>Both models use the same preprocessing, vocabulary, maximum sequence length, metrics, and main training budget.</li>
+<li>The required ablation is dataset size at 25%, 50%, and 100% of the training data.</li>
+<li>The optional extension completed here is maximum sequence length 128 vs 256.</li>
+</ul>
+<p>These constraints are important because a model comparison is only meaningful if the data pipeline and evaluation rules are controlled. If the models used different vocabularies, different tokenization, different data sources, or test-set feedback during development, then final accuracy would be hard to attribute to the model architecture itself.</p>
+<h2 id="3.-dataset-background" tabindex="-1">3. Dataset Background</h2>
+<p>AG News is a news topic classification dataset. Each example is a short text item, and the label is one of four classes:</p>
+<table>
+<thead>
+<tr>
+<th>Label index</th>
+<th>Label name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>World</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Sports</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Business</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Sci/Tech</td>
+</tr>
+</tbody>
+</table>
+<p>The Hugging Face dataset card describes AG News as a text classification dataset derived from a large collection of news articles [1]. The AG News topic classification benchmark used here is associated with Zhang, Zhao, and LeCun's 2015 text classification work [3].</p>
+<p>The implemented notebook uses these splits:</p>
+<table>
+<thead>
+<tr>
+<th>Split</th>
+<th>Source</th>
+<th style="text-align:right">Samples</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Train</td>
+<td>90% of official training split</td>
+<td style="text-align:right">108,000</td>
+<td>Model fitting and train-only vocabulary construction</td>
+</tr>
+<tr>
+<td>Validation</td>
+<td>10% of official training split, seed 42</td>
+<td style="text-align:right">12,000</td>
+<td>Model selection, ablation comparison, and interpretation</td>
+</tr>
+<tr>
+<td>Test</td>
+<td>Official test split</td>
+<td style="text-align:right">7,600</td>
+<td>Final evaluation only</td>
+</tr>
+</tbody>
+</table>
+<p>The notebook verifies that labels are exactly <code>{0, 1, 2, 3}</code>. The final report also records that the official test split is balanced with 1,900 examples per class. The training split is nearly balanced:</p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th style="text-align:right">Training count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>World</td>
+<td style="text-align:right">26,991</td>
+</tr>
+<tr>
+<td>Sports</td>
+<td style="text-align:right">26,966</td>
+</tr>
+<tr>
+<td>Business</td>
+<td style="text-align:right">27,100</td>
+</tr>
+<tr>
+<td>Sci/Tech</td>
+<td style="text-align:right">26,943</td>
+</tr>
+</tbody>
+</table>
+<p>Because the dataset is nearly balanced, accuracy is informative. Macro F1 is still reported because it gives each class equal weight and is more sensitive to class-specific weaknesses.</p>
+<h2 id="4.-model-background" tabindex="-1">4. Model Background</h2>
+<h3 id="4.1-text-classification-pipeline" tabindex="-1">4.1 Text Classification Pipeline</h3>
+<p>Both models receive text after the same preprocessing pipeline:</p>
+<ol>
+<li>Raw text is lowercased and tokenized with a regular expression tokenizer.</li>
+<li>A vocabulary is built from training text only.</li>
+<li>The vocabulary is capped at 20,000 entries.</li>
+<li>Two reserved tokens are used:
+<ul>
+<li><code>&lt;pad&gt;</code> at index 0.</li>
+<li><code>&lt;unk&gt;</code> at index 1.</li>
+</ul>
+</li>
+<li>Tokens are converted to integer IDs.</li>
+<li>Sequences are truncated or padded to a fixed maximum length.</li>
+<li>An attention mask marks real tokens as <code>1</code> and padding positions as <code>0</code>.</li>
+</ol>
+<p>The main comparison uses <code>MAX_LEN = 128</code>. The optional sequence-length extension also trains at <code>MAX_LEN = 256</code>.</p>
+<p>The attention mask has two jobs:</p>
+<ul>
+<li>In the LSTM model, it prevents padded positions from contributing to masked mean pooling.</li>
+<li>In the Transformer Encoder model, it prevents padded positions from being treated as meaningful tokens during attention and pooling.</li>
+</ul>
+<h3 id="4.2-embeddings" tabindex="-1">4.2 Embeddings</h3>
+<p>Both models start with an <code>nn.Embedding</code> layer. This layer maps each token ID to a learned dense vector. In this project, embeddings are learned from scratch during AG News training. They are not initialized from GloVe, word2vec, FastText, BERT, or any pretrained source.</p>
+<p>The shared embedding dimension is 128. With a vocabulary near 20,000 tokens, most model parameters are in the embedding table. This is normal for small text classifiers.</p>
+<h3 id="4.3-lstm-classifier" tabindex="-1">4.3 LSTM Classifier</h3>
+<p>An LSTM is a recurrent neural network architecture designed to process sequences step by step while maintaining a hidden state and a cell state. The original LSTM design was introduced by Hochreiter and Schmidhuber to address long-term dependency problems in standard recurrent neural networks [4]. PyTorch's <code>nn.LSTM</code> implements a multi-layer LSTM recurrent module with the standard input, forget, candidate, and output gate structure [6].</p>
+<p>In practical terms, an LSTM uses gates to decide:</p>
+<ul>
+<li>what new information should enter memory,</li>
+<li>what old information should be forgotten,</li>
+<li>what candidate information should be written,</li>
+<li>what information should be exposed as the hidden state.</li>
+</ul>
+<p>The project uses a bidirectional LSTM. That means the sequence is processed in both directions:</p>
+<ul>
+<li>forward, from the first token to the last token;</li>
+<li>backward, from the last token to the first token.</li>
+</ul>
+<p>The two directions are concatenated, so a hidden size of 128 per direction produces 256 features per token position.</p>
+<p>The implemented LSTM classifier contains:</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Setting</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Embedding dimension</td>
+<td>128</td>
+</tr>
+<tr>
+<td>LSTM layers</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Direction</td>
+<td>Bidirectional</td>
+</tr>
+<tr>
+<td>Hidden size</td>
+<td>128 per direction</td>
+</tr>
+<tr>
+<td>Pooling</td>
+<td>Masked mean pooling</td>
+</tr>
+<tr>
+<td>Dropout</td>
+<td>0.2 before classifier</td>
+</tr>
+<tr>
+<td>Classifier</td>
+<td>Linear layer to 4 classes</td>
+</tr>
+<tr>
+<td>Trainable parameters</td>
+<td>2,825,220</td>
+</tr>
+</tbody>
+</table>
+<p>The forward pass is:</p>
+<ol>
+<li>Convert <code>input_ids</code> to embeddings.</li>
+<li>Run the embeddings through the bidirectional LSTM.</li>
+<li>Multiply token outputs by the mask so padding contributes zero.</li>
+<li>Average over real token positions.</li>
+<li>Apply dropout.</li>
+<li>Apply a linear classifier to produce four logits.</li>
+</ol>
+<p>The model outputs logits, not probabilities. Probabilities are computed only for prediction confidence and analysis using <code>torch.softmax(logits, dim=1)</code>.</p>
+<h3 id="4.4-transformer-encoder-classifier" tabindex="-1">4.4 Transformer Encoder Classifier</h3>
+<p>The Transformer architecture was introduced by Vaswani et al. in "Attention Is All You Need" [5]. Its key idea is self-attention: each token representation can directly attend to other token representations in the same sequence. Unlike a recurrent model, a Transformer layer does not need to process tokens one at a time in sequence order.</p>
+<p>The project uses only the encoder side of the Transformer family, because the task is classification rather than text generation. A Transformer Encoder layer contains self-attention and a feedforward network, matching the role of PyTorch's <code>nn.TransformerEncoderLayer</code> reference implementation [7]. In this project, learned positional embeddings are added to token embeddings so the model has information about token order.</p>
+<p>The implemented Transformer Encoder classifier contains:</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Setting</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Embedding dimension</td>
+<td>128</td>
+</tr>
+<tr>
+<td>Positional encoding</td>
+<td>Learned positional embeddings</td>
+</tr>
+<tr>
+<td>Encoder layers</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Attention heads</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Feedforward dimension</td>
+<td>512</td>
+</tr>
+<tr>
+<td>Pooling</td>
+<td>Masked mean pooling</td>
+</tr>
+<tr>
+<td>Dropout</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>Classifier</td>
+<td>Linear layer to 4 classes</td>
+</tr>
+<tr>
+<td>Trainable parameters</td>
+<td>2,973,444</td>
+</tr>
+</tbody>
+</table>
+<p>The forward pass is:</p>
+<ol>
+<li>Convert <code>input_ids</code> to token embeddings.</li>
+<li>Add learned positional embeddings.</li>
+<li>Build a padding mask from the attention mask.</li>
+<li>Run the sequence through two Transformer Encoder layers.</li>
+<li>Apply masked mean pooling over real token positions.</li>
+<li>Apply dropout.</li>
+<li>Apply a linear classifier to produce four logits.</li>
+</ol>
+<p>The Transformer has about 5.2% more trainable parameters than the LSTM. The difference is small enough for this course comparison, but it is still reported so the final result is not presented as a perfectly equal-capacity comparison.</p>
+<h2 id="5.-loss%2C-metrics%2C-and-evaluation" tabindex="-1">5. Loss, Metrics, And Evaluation</h2>
+<h3 id="5.1-cross-entropy-loss" tabindex="-1">5.1 Cross-Entropy Loss</h3>
+<p>The notebook uses <code>torch.nn.CrossEntropyLoss</code>. In PyTorch, this loss expects unnormalized logits as model input. For the class-index case used here, the target should contain class indices in the range <code>[0, C)</code>, where <code>C</code> is the number of classes [8]. Since AG News has four classes, valid target labels are <code>0</code>, <code>1</code>, <code>2</code>, and <code>3</code>.</p>
+<p>This is why the notebook explicitly checks the label set before training.</p>
+<h3 id="5.2-accuracy" tabindex="-1">5.2 Accuracy</h3>
+<p>Accuracy is the fraction of predictions that match the true label:</p>
+<pre class="hljs"><code><div>accuracy = correct_predictions / total_examples
+</div></code></pre>
+<p>Because AG News is balanced in this run, accuracy is a useful headline metric.</p>
+<h3 id="5.3-macro-f1" tabindex="-1">5.3 Macro F1</h3>
+<p>F1 combines precision and recall for a class. Macro F1 computes F1 separately for each class and then averages the class scores without weighting by class frequency [10].</p>
+<p>This matters because a model could have strong overall accuracy but still perform worse on one class. Macro F1 makes that weakness more visible.</p>
+<h3 id="5.4-confusion-matrix" tabindex="-1">5.4 Confusion Matrix</h3>
+<p>A confusion matrix shows which true classes are predicted as which output classes. Rows represent true labels, and columns represent predictions. A strong classifier has large diagonal entries and small off-diagonal entries.</p>
+<p>In this project, the confusion matrices are used to identify class-level error patterns. The main observed pattern is Business vs Sci/Tech confusion.</p>
+<h2 id="6.-repository-structure" tabindex="-1">6. Repository Structure</h2>
+<p>The important project files are:</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>README.md</code></td>
+<td>Project overview, current status, dataset, model, experiment, and deliverable summary</td>
+</tr>
+<tr>
+<td><code>AGENTS.md</code></td>
+<td>Project-specific instructions and constraints for future agent work</td>
+</tr>
+<tr>
+<td><code>requirements.txt</code></td>
+<td>Python dependencies</td>
+</tr>
+<tr>
+<td><code>References/2026_term_project.pdf</code></td>
+<td>Assignment source document</td>
+</tr>
+<tr>
+<td><code>notebooks/ag_news_lstm_transformer.ipynb</code></td>
+<td>Main experiment notebook</td>
+</tr>
+<tr>
+<td><code>outputs/</code></td>
+<td>Generated CSV tables and PNG figures from the notebook</td>
+</tr>
+<tr>
+<td><code>docs/initial_project_plan.md</code></td>
+<td>Initial course-facing project plan</td>
+</tr>
+<tr>
+<td><code>docs/one_page_project_summary.md</code></td>
+<td>Final one-page project summary with results</td>
+</tr>
+<tr>
+<td><code>docs/final_report.md</code></td>
+<td>Final report source in Markdown</td>
+</tr>
+<tr>
+<td><code>docs/ai_usage_appendix_final.md</code></td>
+<td>Final AI Usage Appendix source</td>
+</tr>
+<tr>
+<td><code>docs/final_presentation_script.md</code></td>
+<td>Slide plan and presenter script</td>
+</tr>
+<tr>
+<td><code>deliverables/</code></td>
+<td>Final DOCX and PPTX submission artifacts</td>
+</tr>
+<tr>
+<td><code>tools/build_final_deliverables.py</code></td>
+<td>Script used to generate final deliverable files</td>
+</tr>
+<tr>
+<td><code>docs/project_manual.md</code></td>
+<td>This manual</td>
+</tr>
+</tbody>
+</table>
+<p>The repository is inside a larger parent checkout. Future commits should stage only project-relevant files from <code>Term Project/</code> unless the user explicitly asks to modify parent-repository files.</p>
+<h2 id="7.-notebook-workflow" tabindex="-1">7. Notebook Workflow</h2>
+<p>The main notebook is organized as a linear experiment pipeline.</p>
+<h3 id="7.1-setup-and-reproducibility" tabindex="-1">7.1 Setup And Reproducibility</h3>
+<p>The notebook imports PyTorch, Hugging Face Datasets, pandas, NumPy, matplotlib, seaborn, and scikit-learn metrics. It sets:</p>
+<ul>
+<li><code>SEED = 42</code></li>
+<li>deterministic CuDNN flags where relevant</li>
+<li><code>device = "cuda"</code> if available, otherwise CPU</li>
+</ul>
+<p>The current run used CPU.</p>
+<h3 id="7.2-load-dataset" tabindex="-1">7.2 Load Dataset</h3>
+<p>The notebook loads:</p>
+<pre class="hljs"><code><div>raw_dataset = load_dataset(<span class="hljs-string">"fancyzhx/ag_news"</span>)
+</div></code></pre>
+<p>It then splits <code>raw_dataset["train"]</code> into train and validation:</p>
+<pre class="hljs"><code><div>split_dataset = raw_dataset[<span class="hljs-string">"train"</span>].train_test_split(test_size=<span class="hljs-number">0.1</span>, seed=SEED)
+</div></code></pre>
+<p>The official test split is kept separate as <code>test_data</code>.</p>
+<h3 id="7.3-inspect-labels-and-splits" tabindex="-1">7.3 Inspect Labels And Splits</h3>
+<p>The notebook creates tables for split sizes and class distributions. It asserts that all labels across train, validation, and test are exactly <code>{0, 1, 2, 3}</code>.</p>
+<p>This step is a guard against label-format mistakes before <code>CrossEntropyLoss</code> is used.</p>
+<h3 id="7.4-tokenization-and-vocabulary" tabindex="-1">7.4 Tokenization And Vocabulary</h3>
+<p>The tokenizer is a regular expression tokenizer:</p>
+<pre class="hljs"><code><div>TOKEN_RE = re.<span class="hljs-built_in">compile</span>(<span class="hljs-string">r"[A-Za-z0-9]+(?:'[A-Za-z0-9]+)?"</span>)
+</div></code></pre>
+<p>The tokenizer lowercases text and extracts alphanumeric word-like tokens. The vocabulary is built from <code>train_data["text"]</code> only. This avoids leakage from validation or test text.</p>
+<p>Vocabulary settings:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Vocabulary cap</td>
+<td>20,000</td>
+</tr>
+<tr>
+<td>Padding token</td>
+<td><code>&lt;pad&gt;</code></td>
+</tr>
+<tr>
+<td>Unknown token</td>
+<td><code>&lt;unk&gt;</code></td>
+</tr>
+<tr>
+<td>Padding index</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Unknown index</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Main maximum length</td>
+<td>128</td>
+</tr>
+</tbody>
+</table>
+<h3 id="7.5-dataset-and-dataloader" tabindex="-1">7.5 Dataset And DataLoader</h3>
+<p>The notebook wraps Hugging Face examples in a PyTorch <code>Dataset</code>. Each item returns:</p>
+<ul>
+<li><code>input_ids</code>: token ID tensor,</li>
+<li><code>attention_mask</code>: Boolean mask where real tokens are true,</li>
+<li><code>label</code>: integer class label,</li>
+<li><code>text</code>: original raw text for later failure analysis.</li>
+</ul>
+<p>The batch size is 64. Training loaders use shuffling; validation and test loaders do not need shuffling.</p>
+<h3 id="7.6-model-definitions" tabindex="-1">7.6 Model Definitions</h3>
+<p>The notebook defines:</p>
+<ul>
+<li><code>LSTMClassifier</code></li>
+<li><code>TransformerEncoderClassifier</code></li>
+<li><code>count_trainable_parameters</code></li>
+</ul>
+<p>The parameter count table is exported as <code>outputs/parameter_counts.csv</code>.</p>
+<h3 id="7.7-training-and-evaluation-utilities" tabindex="-1">7.7 Training And Evaluation Utilities</h3>
+<p>The notebook defines a shared <code>run_epoch</code> function used for both training and evaluation. It:</p>
+<ol>
+<li>switches the model into train or eval mode,</li>
+<li>computes logits,</li>
+<li>computes cross-entropy loss,</li>
+<li>performs backward pass and optimizer update during training,</li>
+<li>stores labels, predictions, and probabilities,</li>
+<li>returns loss, accuracy, macro F1, labels, predictions, and probabilities.</li>
+</ol>
+<p>The shared evaluation path is important because it prevents accidental metric differences between models.</p>
+<h3 id="7.8-main-comparison" tabindex="-1">7.8 Main Comparison</h3>
+<p>The main comparison trains the LSTM and Transformer Encoder for 6 epochs each with:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Optimizer</td>
+<td>Adam</td>
+</tr>
+<tr>
+<td>Learning rate</td>
+<td>1e-3</td>
+</tr>
+<tr>
+<td>Batch size</td>
+<td>64</td>
+</tr>
+<tr>
+<td>Epochs</td>
+<td>6</td>
+</tr>
+<tr>
+<td>Dropout</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>Max sequence length</td>
+<td>128</td>
+</tr>
+<tr>
+<td>Seed</td>
+<td>42</td>
+</tr>
+<tr>
+<td>Runtime</td>
+<td>CPU</td>
+</tr>
+</tbody>
+</table>
+<p>After training, both models are evaluated on validation and official test splits. The output table is <code>outputs/main_results.csv</code>.</p>
+<h3 id="7.9-dataset-size-ablation" tabindex="-1">7.9 Dataset-Size Ablation</h3>
+<p>The required ablation tests how performance changes with less training data. The tested fractions are:</p>
+<ul>
+<li>25% of the training split,</li>
+<li>50% of the training split,</li>
+<li>100% of the training split.</li>
+</ul>
+<p>Each model is retrained for each fraction and evaluated on the same validation split. The official test split is not used for ablation comparisons.</p>
+<p>The 100% ablation result is a retraining inside the ablation loop, so it should be interpreted as the 100% point within the ablation experiment, not as a byte-for-byte duplicate of the main comparison run.</p>
+<h3 id="7.10-optional-sequence-length-ablation" tabindex="-1">7.10 Optional Sequence-Length Ablation</h3>
+<p>The optional extension compares maximum sequence length 128 vs 256. Both models are retrained at each length and evaluated on validation data.</p>
+<p>This tests whether allowing longer input context improves performance enough to justify the extra cost.</p>
+<h3 id="7.11-failure-analysis" tabindex="-1">7.11 Failure Analysis</h3>
+<p>The notebook builds a table of test-set examples with:</p>
+<ul>
+<li>raw text,</li>
+<li>true label,</li>
+<li>LSTM prediction,</li>
+<li>Transformer prediction,</li>
+<li>LSTM confidence,</li>
+<li>Transformer confidence.</li>
+</ul>
+<p>It selects six examples:</p>
+<ul>
+<li>two cases both models got wrong,</li>
+<li>two cases only the LSTM got wrong,</li>
+<li>two cases only the Transformer got wrong.</li>
+</ul>
+<p>The selected examples are exported to <code>outputs/selected_misclassifications.csv</code>.</p>
+<h3 id="7.12-export-tables-and-figures" tabindex="-1">7.12 Export Tables And Figures</h3>
+<p>The notebook exports result tables and figures to <code>outputs/</code>. These outputs are the evidence base for the final report, presentation, and this manual.</p>
+<h2 id="8.-output-artifact-guide" tabindex="-1">8. Output Artifact Guide</h2>
+<h3 id="8.1-tables" tabindex="-1">8.1 Tables</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>outputs/parameter_counts.csv</code></td>
+<td>Trainable parameter count for each model</td>
+</tr>
+<tr>
+<td><code>outputs/main_results.csv</code></td>
+<td>Validation and final test loss, accuracy, and macro F1</td>
+</tr>
+<tr>
+<td><code>outputs/dataset_size_ablation.csv</code></td>
+<td>Validation accuracy and macro F1 at 25%, 50%, and 100% training data</td>
+</tr>
+<tr>
+<td><code>outputs/sequence_length_ablation.csv</code></td>
+<td>Validation loss, accuracy, and macro F1 at max lengths 128 and 256</td>
+</tr>
+<tr>
+<td><code>outputs/selected_misclassifications.csv</code></td>
+<td>Six representative failure-analysis examples</td>
+</tr>
+<tr>
+<td><code>outputs/artifact_manifest.csv</code></td>
+<td>Compact inventory of generated output artifacts</td>
+</tr>
+</tbody>
+</table>
+<h3 id="8.2-figures" tabindex="-1">8.2 Figures</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>outputs/main_loss_curves.png</code></td>
+<td>Training and validation loss curves for the main comparison</td>
+</tr>
+<tr>
+<td><code>outputs/lstm_confusion_matrix.png</code></td>
+<td>LSTM confusion matrix on the official test split</td>
+</tr>
+<tr>
+<td><code>outputs/transformer_confusion_matrix.png</code></td>
+<td>Transformer Encoder confusion matrix on the official test split</td>
+</tr>
+</tbody>
+</table>
+<p>The loss-curve figure is used to discuss convergence and overfitting. The confusion matrices are used to discuss class-level mistakes, especially Business vs Sci/Tech.</p>
+<h3 id="8.3-final-deliverables" tabindex="-1">8.3 Final Deliverables</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>deliverables/ag_news_one_page_summary.docx</code></td>
+<td>One-page project plan and result summary</td>
+</tr>
+<tr>
+<td><code>deliverables/ag_news_final_report.docx</code></td>
+<td>Final report without AI Usage Appendix</td>
+</tr>
+<tr>
+<td><code>deliverables/ag_news_ai_usage_appendix.docx</code></td>
+<td>Standalone AI Usage Appendix</td>
+</tr>
+<tr>
+<td><code>deliverables/ag_news_final_report_with_ai_appendix.docx</code></td>
+<td>Combined report and appendix</td>
+</tr>
+<tr>
+<td><code>deliverables/ag_news_lstm_transformer_presentation.pptx</code></td>
+<td>Final presentation deck</td>
+</tr>
+</tbody>
+</table>
+<p>The file <code>deliverables/completion_audit.md</code> records that the generated Word and PowerPoint artifacts were structurally and visually checked, including page counts for the report and appendix and slide export checks for the presentation.</p>
+<h2 id="9.-results-achieved" tabindex="-1">9. Results Achieved</h2>
+<h3 id="9.1-parameter-counts" tabindex="-1">9.1 Parameter Counts</h3>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th style="text-align:right">Trainable parameters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LSTM</td>
+<td style="text-align:right">2,825,220</td>
+</tr>
+<tr>
+<td>Transformer Encoder</td>
+<td style="text-align:right">2,973,444</td>
+</tr>
+</tbody>
+</table>
+<p>The Transformer Encoder has 148,224 more trainable parameters, about a 5.2% increase over the LSTM. This is close enough for a course-level comparison, but the report correctly treats the comparison as "reasonably comparable" rather than exactly parameter-matched.</p>
+<h3 id="9.2-main-validation-and-test-results" tabindex="-1">9.2 Main Validation And Test Results</h3>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Split</th>
+<th style="text-align:right">Loss</th>
+<th style="text-align:right">Accuracy</th>
+<th style="text-align:right">Macro F1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LSTM</td>
+<td>Validation</td>
+<td style="text-align:right">0.3402</td>
+<td style="text-align:right">0.9113</td>
+<td style="text-align:right">0.9108</td>
+</tr>
+<tr>
+<td>Transformer Encoder</td>
+<td>Validation</td>
+<td style="text-align:right">0.3103</td>
+<td style="text-align:right">0.9118</td>
+<td style="text-align:right">0.9115</td>
+</tr>
+<tr>
+<td>LSTM</td>
+<td>Test</td>
+<td style="text-align:right">0.3459</td>
+<td style="text-align:right">0.9120</td>
+<td style="text-align:right">0.9118</td>
+</tr>
+<tr>
+<td>Transformer Encoder</td>
+<td>Test</td>
+<td style="text-align:right">0.3066</td>
+<td style="text-align:right">0.9125</td>
+<td style="text-align:right">0.9126</td>
+</tr>
+</tbody>
+</table>
+<p>The Transformer Encoder has the best final test metrics, but the margin is small:</p>
+<ul>
+<li>Accuracy lead: 0.0005, or 0.05 percentage points.</li>
+<li>Macro F1 lead: about 0.0008.</li>
+</ul>
+<p>The correct interpretation is that both models perform very similarly on the final test split. The Transformer Encoder is slightly ahead in this run, but the result should not be overstated as a decisive architectural win.</p>
+<h3 id="9.3-training-behavior" tabindex="-1">9.3 Training Behavior</h3>
+<p>The loss curves show that both models continue reducing training loss while validation loss stops improving and then increases by the final epoch. This indicates overfitting by epoch 6.</p>
+<p>Observed pattern:</p>
+<ul>
+<li>The LSTM reaches strong validation accuracy early but develops a larger train-validation loss gap.</li>
+<li>The Transformer Encoder has slightly lower validation and test loss in the final main comparison.</li>
+<li>A future improvement would be to use early stopping or stronger regularization based on validation loss.</li>
+</ul>
+<h3 id="9.4-confusion-matrix-findings" tabindex="-1">9.4 Confusion Matrix Findings</h3>
+<p>Both confusion matrices show that Sports is the easiest class for both models. The most persistent confusion is between Business and Sci/Tech.</p>
+<p>The final report records these examples of Business/Sci-Tech confusion:</p>
+<ul>
+<li>LSTM: 177 Business examples predicted as Sci/Tech, and 121 Sci/Tech examples predicted as Business.</li>
+<li>Transformer Encoder: 200 Business examples predicted as Sci/Tech, and 93 Sci/Tech examples predicted as Business.</li>
+</ul>
+<p>This is plausible because many news stories about technology companies contain both market language and technology language.</p>
+<h3 id="9.5-dataset-size-ablation" tabindex="-1">9.5 Dataset-Size Ablation</h3>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th style="text-align:right">Training fraction</th>
+<th style="text-align:right">Validation accuracy</th>
+<th style="text-align:right">Validation macro F1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LSTM</td>
+<td style="text-align:right">25%</td>
+<td style="text-align:right">0.8719</td>
+<td style="text-align:right">0.8713</td>
+</tr>
+<tr>
+<td>Transformer Encoder</td>
+<td style="text-align:right">25%</td>
+<td style="text-align:right">0.8699</td>
+<td style="text-align:right">0.8696</td>
+</tr>
+<tr>
+<td>LSTM</td>
+<td style="text-align:right">50%</td>
+<td style="text-align:right">0.8944</td>
+<td style="text-align:right">0.8940</td>
+</tr>
+<tr>
+<td>Transformer Encoder</td>
+<td style="text-align:right">50%</td>
+<td style="text-align:right">0.8901</td>
+<td style="text-align:right">0.8895</td>
+</tr>
+<tr>
+<td>LSTM</td>
+<td style="text-align:right">100%</td>
+<td style="text-align:right">0.9089</td>
+<td style="text-align:right">0.9082</td>
+</tr>
+<tr>
+<td>Transformer Encoder</td>
+<td style="text-align:right">100%</td>
+<td style="text-align:right">0.9146</td>
+<td style="text-align:right">0.9142</td>
+</tr>
+</tbody>
+</table>
+<p>The ablation supports the original hypothesis:</p>
+<ul>
+<li>With 25% training data, the LSTM is slightly better.</li>
+<li>With 50% training data, the LSTM is still better.</li>
+<li>With 100% training data, the Transformer Encoder becomes better.</li>
+</ul>
+<p>The technical interpretation is that the LSTM is more stable in lower-data settings, while the Transformer Encoder benefits more from the full dataset. The differences are modest, so the result should be described as a trend rather than as proof of universal superiority.</p>
+<h3 id="9.6-optional-sequence-length-ablation" tabindex="-1">9.6 Optional Sequence-Length Ablation</h3>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th style="text-align:right">Max length</th>
+<th style="text-align:right">Validation loss</th>
+<th style="text-align:right">Validation accuracy</th>
+<th style="text-align:right">Validation macro F1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LSTM</td>
+<td style="text-align:right">128</td>
+<td style="text-align:right">0.3402</td>
+<td style="text-align:right">0.9113</td>
+<td style="text-align:right">0.9108</td>
+</tr>
+<tr>
+<td>Transformer Encoder</td>
+<td style="text-align:right">128</td>
+<td style="text-align:right">0.3103</td>
+<td style="text-align:right">0.9118</td>
+<td style="text-align:right">0.9115</td>
+</tr>
+<tr>
+<td>LSTM</td>
+<td style="text-align:right">256</td>
+<td style="text-align:right">0.3535</td>
+<td style="text-align:right">0.9065</td>
+<td style="text-align:right">0.9058</td>
+</tr>
+<tr>
+<td>Transformer Encoder</td>
+<td style="text-align:right">256</td>
+<td style="text-align:right">0.3304</td>
+<td style="text-align:right">0.9062</td>
+<td style="text-align:right">0.9059</td>
+</tr>
+</tbody>
+</table>
+<p>Increasing the maximum length from 128 to 256 did not improve validation performance. Both models performed worse at 256 tokens.</p>
+<p>A likely explanation is that AG News texts are short enough that 128 tokens already capture the useful signal for most examples. Longer sequences also increase computation and may introduce more noisy or weakly useful tokens under the same six-epoch training budget.</p>
+<h3 id="9.7-failure-analysis" tabindex="-1">9.7 Failure Analysis</h3>
+<p>The selected failure cases show three recurring themes:</p>
+<ul>
+<li>Surface cues can dominate the true news section. For example, an Olympics-related text labeled World was predicted as Sports by both models.</li>
+<li>Business and Sci/Tech overlap heavily when a story discusses a technology company, IPO, chip delay, software company, or computing-related business event.</li>
+<li>Short science or technology items can be ambiguous because there is less context for the model to average over.</li>
+</ul>
+<p>The failure analysis is useful because it shows that the remaining errors are mostly semantic boundary cases, not obvious preprocessing failures or label-format bugs.</p>
+<h2 id="10.-what-has-been-achieved" tabindex="-1">10. What Has Been Achieved</h2>
+<p>The current project has achieved the required core objectives:</p>
+<ul>
+<li>Built a reproducible Jupyter/PyTorch notebook.</li>
+<li>Loaded one AG News dataset source through Hugging Face Datasets.</li>
+<li>Created a validation split from the official training split.</li>
+<li>Reserved the official test split for final evaluation.</li>
+<li>Built a train-only vocabulary.</li>
+<li>Implemented an LSTM classifier from scratch.</li>
+<li>Implemented a Transformer Encoder classifier from scratch.</li>
+<li>Trained both models under the same main preprocessing and training budget.</li>
+<li>Reported trainable parameter counts.</li>
+<li>Reported accuracy and macro F1.</li>
+<li>Exported loss curves and confusion matrices.</li>
+<li>Completed the required dataset-size ablation.</li>
+<li>Completed an optional sequence-length ablation.</li>
+<li>Exported six selected misclassified examples.</li>
+<li>Drafted final report, AI Usage Appendix, one-page summary, and presentation artifacts.</li>
+<li>Audited final deliverables for structure, page counts, slide counts, and rendered content.</li>
+</ul>
+<p>The most important empirical findings are:</p>
+<ul>
+<li>Both models reach about 91.2% final test accuracy.</li>
+<li>The Transformer Encoder is slightly better on final test accuracy and macro F1.</li>
+<li>The LSTM is stronger at 25% and 50% training data.</li>
+<li>The Transformer Encoder benefits more at 100% training data.</li>
+<li>Increasing max sequence length from 128 to 256 hurts validation performance in this run.</li>
+<li>The main error pattern is Business vs Sci/Tech ambiguity.</li>
+<li>Both models show overfitting by the final epoch.</li>
+</ul>
+<h2 id="11.-reproducibility-notes" tabindex="-1">11. Reproducibility Notes</h2>
+<h3 id="11.1-environment" tabindex="-1">11.1 Environment</h3>
+<p>The project dependencies are listed in <code>requirements.txt</code>:</p>
+<pre class="hljs"><code><div>datasets
+jupyter
+matplotlib
+numpy
+pandas
+pip-system-certs
+scikit-learn
+seaborn
+torch
+</div></code></pre>
+<p>The notebook can be run from the project root or from the <code>notebooks/</code> directory. It computes <code>PROJECT_ROOT</code> so outputs are written to the project-level <code>outputs/</code> directory.</p>
+<h3 id="11.2-re-running-the-notebook" tabindex="-1">11.2 Re-running The Notebook</h3>
+<p>To reproduce the experiment:</p>
+<ol>
+<li>Install the dependencies.</li>
+<li>Open <code>notebooks/ag_news_lstm_transformer.ipynb</code>.</li>
+<li>Run all cells in order.</li>
+<li>Inspect generated outputs in <code>outputs/</code>.</li>
+<li>Confirm report claims still match the generated CSV files and figures.</li>
+</ol>
+<p>Because training is stochastic and uses CPU/GPU kernels, exact values can vary by environment. The notebook sets seeds and deterministic flags to reduce variance, but future runs should still treat the generated CSV outputs as the source of truth for report claims.</p>
+<h3 id="11.3-regenerating-deliverables" tabindex="-1">11.3 Regenerating Deliverables</h3>
+<p>The deliverables can be regenerated with:</p>
+<pre class="hljs"><code><div>python tools\build_final_deliverables.py
+</div></code></pre>
+<p>After regeneration, check:</p>
+<ul>
+<li><code>deliverables/ag_news_final_report.docx</code></li>
+<li><code>deliverables/ag_news_ai_usage_appendix.docx</code></li>
+<li><code>deliverables/ag_news_final_report_with_ai_appendix.docx</code></li>
+<li><code>deliverables/ag_news_lstm_transformer_presentation.pptx</code></li>
+</ul>
+<p>The existing completion audit records that the report, appendix, combined report, and presentation were checked on 2026-05-27.</p>
+<h2 id="12.-interpretation-guidelines-for-future-work" tabindex="-1">12. Interpretation Guidelines For Future Work</h2>
+<p>Use these rules when modifying or extending the project:</p>
+<ul>
+<li>Do not compare against pretrained models unless the instructor explicitly allows it.</li>
+<li>Do not mix TorchText AG News, raw CSV AG News, and Hugging Face AG News in one experiment.</li>
+<li>Do not tune hyperparameters on the official test split.</li>
+<li>Do not rebuild vocabulary on validation or test text.</li>
+<li>Do not claim the Transformer is decisively superior from the current metrics; the final advantage is small.</li>
+<li>Do not claim 256-token context is better; the current result shows the opposite.</li>
+<li>Do treat Business vs Sci/Tech as the main class-boundary issue.</li>
+<li>Do treat early stopping and regularization as reasonable next experiments.</li>
+<li>Do preserve output CSV files as the evidence source for report and presentation claims.</li>
+</ul>
+<p>Good next technical extensions would be:</p>
+<ul>
+<li>early stopping based on validation loss,</li>
+<li>dropout or weight decay tuning,</li>
+<li>multiple random seeds for more robust conclusions,</li>
+<li>a parameter-matched model-size sensitivity study,</li>
+<li>per-class precision, recall, and F1 tables,</li>
+<li>calibration analysis for confidence scores,</li>
+<li>runtime comparison between the two architectures.</li>
+</ul>
+<h2 id="13.-reference-notes" tabindex="-1">13. Reference Notes</h2>
+<p>The manual uses two kinds of evidence:</p>
+<ul>
+<li>Local project evidence: the notebook, exported CSV tables, exported PNG figures, report source, and completion audit.</li>
+<li>External references: dataset cards, library documentation, and foundational model papers.</li>
+</ul>
+<h2 id="14.-references" tabindex="-1">14. References</h2>
+<ol>
+<li>Hugging Face dataset card for <code>fancyzhx/ag_news</code>: https://huggingface.co/datasets/fancyzhx/ag_news</li>
+<li>Hugging Face Datasets loading documentation: https://huggingface.co/docs/datasets/loading</li>
+<li>Zhang, X., Zhao, J., and LeCun, Y. (2015). "Character-level Convolutional Networks for Text Classification." arXiv:1509.01626. https://arxiv.org/abs/1509.01626</li>
+<li>Hochreiter, S., and Schmidhuber, J. (1997). "Long Short-Term Memory." Neural Computation, 9(8), 1735-1780. DOI: https://doi.org/10.1162/neco.1997.9.8.1735</li>
+<li>Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, L., and Polosukhin, I. (2017). "Attention Is All You Need." arXiv:1706.03762. https://arxiv.org/abs/1706.03762</li>
+<li>PyTorch <code>torch.nn.LSTM</code> documentation: https://docs.pytorch.org/docs/2.12/generated/torch.nn.LSTM.html</li>
+<li>PyTorch <code>torch.nn.TransformerEncoderLayer</code> documentation: https://docs.pytorch.org/docs/2.12/generated/torch.nn.TransformerEncoderLayer.html</li>
+<li>PyTorch <code>torch.nn.CrossEntropyLoss</code> documentation: https://docs.pytorch.org/docs/2.12/generated/torch.nn.CrossEntropyLoss.html</li>
+<li>scikit-learn <code>train_test_split</code> documentation: https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html</li>
+<li>scikit-learn <code>f1_score</code> documentation: https://sklearn.org/1.8/modules/generated/sklearn.metrics.f1_score.html</li>
+</ol>
+
+    </div>
+
+
+</body></html>
